@@ -14,7 +14,7 @@
 ---
   * **Reglas del juego:**    
      
-     El juego tiene 28 cartas.  
+     El juego tiene 28 cartas y podrán jugar entre 2 y 8 pretendientes.  
      Cada carta tiene un valor en la esquina superior izquierda: Cuanto más alto sea el número, más cercana es la persona a la princesa. Cada carta tiene un efecto distinto al ser descartada.   
      
      Las cartas se colocan en un mazo boca abajo y se elimina la primera carta del mazo sin mirarla, cada jugador roba una carta del mazo, esta carta es la mano inicial y debe mantenterse en secreto. En la primera ronda, el jugador que empieza se elegirá aleatoriamente.  
