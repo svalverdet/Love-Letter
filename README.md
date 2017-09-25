@@ -3,6 +3,7 @@
 ---
 * **Descripción de la temática del juego:**  
 
+  Tras el arresto de la Reina Madalen acusada de alta traición, nadie resultó más entristecida por la noticia que su hija.
   Los prendientes de la ciudad estado Deba buscan consolar la pena de la princesa Catalinxu cortejándola para traer un poco de alegría a su vida.  
   Tú eres uno de esos pretendientes, intentando que tu carta de amor llegue a la princesa. Lamentablemente, ella se ha recluido en su palacio por lo que debes confiar en que los intermediarios lleven tu mensaje.  
   A lo largo del juego mantendrás una carta en secreto en tu mano, que representa a quien llevará tu mensaje de amor a tu princesa.  
