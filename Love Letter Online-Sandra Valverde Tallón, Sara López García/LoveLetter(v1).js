@@ -1,10 +1,16 @@
 /*
-    ENTREGA 4: interacción con las cartas del jugador al clicar sobre ellas. Reparto automático en la primera ronda. 
-    Siguiente: crear el array cartasMesaJugadores y poder rellenarlo clicando en las cartas (de J1)
-
-    (ACT) ENTREGA 5: se muestra la última carta descartada. Se rellena el array de las cartas en mesa del J1. 
+    ENTREGA 5: se muestra la última carta descartada. Se rellena el array de las cartas en mesa del J1. 
                 La partida continua hasta que se acaba el mazo.
-    Siguiente: solución de errores pendientes (3/4) y limpieza de código
+    Siguiente: solución de errores pendientes (4/4) y limpieza de código
+
+    ENTREGA 6: solución de errores. 
+                Descripción: se han solucionado los siguientes errores:
+                - Los jugadores "bot" no realizaban la animación de descarte.
+                - La carta descartada no se actualizaba correctamente.
+                - El reparto al J1 no funcionaba (dos cartas iban a la misma posición).
+                - Ya no pueden echarse dos cartas a la vez.
+    Siguiente: empezar a hacer los efectos de las cartas.
+
 
     1. Para pasar a pantalla completa basta con pulsar F11.
     2. He seguido el tutorial de Emanuele de Deck of cards management.
@@ -15,20 +21,13 @@
        acceder con [0][0] y [0][1] a sus cartas. La segunda coordenada sí se mantiene.
 
 
-
-    PENDIENTE:
-    1. Por qué no están haciendo los bots la animacion de descarte. Sol
-    2. Por qué no se cambia la imagen a la que debería. 
-    3. por qué falla al volver al J1. Sol
-    4. Hacer que no se puedan echar dos cartas a la vez. Sol
-
 */
 
 var gameOptions = {
     gameWidth: 1280,
     gameHeight: 720,
-    cardSheetWidth: 1416/8-1,
-    cardSheetHeight: 214-1,
+    cardSheetWidth: 178,
+    cardSheetHeight: 208
 }
 var game = new Phaser.Game(gameOptions.gameWidth, gameOptions.gameHeight, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 
@@ -37,8 +36,7 @@ function preload() {
     game.load.image('mesa', 'assets/prueba/mesa.png');//mejor en el css como background
     game.load.image('carta', 'assets/prueba/carta.png');
     game.load.image('descarte', 'assets/prueba/descarte.png');
-    game.load.spritesheet("cartas","assets/prueba/cartaSHEET.png",gameOptions.cardSheetWidth,gameOptions.cardSheetHeight);
-
+    game.load.spritesheet("cartas", "assets/prueba/spritesheet(b).png", gameOptions.cardSheetWidth, gameOptions.cardSheetHeight);
 }
 
 //variables globales
@@ -81,7 +79,7 @@ function create() {
     cartaMazo.angle=90;
 
     //Creación del mazo 
-    mazo = Phaser.ArrayUtils.numberArray(0,7); //Esta versión tiene 8 cartas: guardia, guardia, princesa, rey, rey, rey, rey, rey
+    mazo = Phaser.ArrayUtils.numberArray(0,27); //Esta versión tiene 8 cartas: guardia, guardia, princesa, rey, rey, rey, rey, rey
     Phaser.ArrayUtils.shuffle(mazo);
 
     //Creación de los objetos mesa. Para elegir a los demás jugadores y donde se posicionan sus cartas descartadas
@@ -105,15 +103,64 @@ function sacarCartaMazo() {
     //Según el índice se accede al tipo de carta
     var tipo = mazo[indiceMazo];
      //Se asignan las propiedades de la carta                               //Cambiar a switch
-    if(tipo===2){
-        carta.valor = 8;
-        carta.personaje = "Princesa";
-    }else if(tipo===0 || tipo===1){
-        carta.valor = 1;
-        carta.personaje = "Guardia";
-    }else{
-        carta.valor = 6;
-        carta.personaje = "Rey";
+    switch (tipo){
+        case 0:
+        case 1:
+            carta.valor = 0;
+            carta.personaje = "Asesino";
+            break;
+        case 10:
+        case 11:
+            carta.valor = 2;
+            carta.personaje = "Timador";
+            break;
+        case 12:
+        case 13:
+        case 14:
+        case 15:
+            carta.valor = 2;
+            carta.personaje = "Cura";
+            break;
+        case 16:
+        case 17:
+            carta.valor = 3;
+            carta.personaje = "Baron";
+            break;
+        case 18:
+            carta.valor = 3;
+            carta.persoanje = "Baronesa";
+            break;
+        case 19:
+            carta.valor = 4;
+            carta.personaje = "Mayordomo";
+            break;
+        case 20:
+        case 21:
+            carta.valor = 4;
+            carta.persoanje = "Criada";
+            break;
+        case 22:
+        case 23:
+        case 24:
+            carta.valor = 5;
+            carta.persoanje = "Principe";
+            break;
+        case 25:
+            carta.valor = 6;
+            carta.personaje = "Rey";
+            break;
+        case 26:
+            carta.valor = 7;
+            carta.personaje = "Condesa";
+            break;
+        case 27:
+            carta.valor = 8;
+            carta.personaje = "Princesa";
+            break;
+        default:
+            carta.valor = 1;
+            carta.persoanje = "Guardia";
+
     }
 
     //Cuando se acaba el mazo, se quita la imagen que hacía de mazo
@@ -182,8 +229,6 @@ function jugarBot(){
         else cartasMesaJugadores[turnoJugador].push(carta);
         animacionDescartar(carta, indice);
     }
-
-    
 }
 
 function elegirCarta(carta, a, b, indice){
@@ -205,10 +250,16 @@ function animacionDescartar(carta, indice){
         },500,Phaser.Easing.Cubic.Out, true);
         //Al terminar la animación, se cambia la imagen de descarte de jugadores.
         tween.onComplete.add(function() {
-            cartaDescarteJugadores[turnoJugador].loadTexture('cartas', carta.frame); 
+            //Se añade la imagen encima (podría mejorarse)
+            var im_temp = game.add.image(posMesaJugadores[turnoJugador][0], posMesaJugadores[turnoJugador][1], 'cartas', carta.frame);
+            im_temp.anchor.setTo(0.5, 0.5);
+
+
+            //No ha habido otro modo de eliminar la carta
             delete cartasManoJugadores[turnoJugador][indice];
         }); 
     
+    //Para que no se reparta tan rápido
     game.time.events.add(1250, finTurno, this);
 }
 
@@ -252,7 +303,7 @@ function manejadorTurnos(){
     if(finReparto){
         if(cartasManoJugadores[0][0] !== undefined) cartasManoJugadores[0][0].events.onInputUp.add(elegirCarta, this, 0, 0);
         if(cartasManoJugadores[0][1] !== undefined) cartasManoJugadores[0][1].events.onInputUp.add(elegirCarta, this, 0, 1);
-        jugarBot();
+        game.time.events.add(1000, jugarBot);
     }
     else{
         turnos++;
