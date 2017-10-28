@@ -1,12 +1,4 @@
 /*
-    ENTREGA 6: solución de errores. 
-                Descripción: se han solucionado los siguientes errores:
-                - Los jugadores "bot" no realizaban la animación de descarte.
-                - La carta descartada no se actualizaba correctamente.
-                - El reparto al J1 no funcionaba (dos cartas iban a la misma posición).
-                - Ya no pueden echarse dos cartas a la vez.
-    Siguiente: empezar a hacer los efectos de las cartas.
-
     ENTREGA 7: se determinan todas las formas de llegar al final de la partida. (8/12) + error solucionado
     - Efecto condesa terminado.
     - Efecto princesa terminado.
@@ -23,6 +15,15 @@
 
 
 
+    ENTREGA 8: más efectos añadidos.
+    - Efecto Timador terminado.
+    - Efecto Rey terminado.
+    - Efecto Guardia empezado.
+    
+    Siguiente: depurar errores, terminar guardia y asesino, hacer el descarte de la ultima carta una vez un jugador muere.
+
+    
+
     1. Para pasar a pantalla completa basta con pulsar F11.
     2. He seguido el tutorial de Emanuele de Deck of cards management.
     3. Las cartas se irán generando en el mazo y deslizándose con Timer y Tween hacia los jugadores.
@@ -31,8 +32,13 @@
     5. Según como está el código, siempre va a empezar J1 (persona real). Para cambiarlo habría que asignar un índice al J1, en vez de
        acceder con [0][0] y [0][1] a sus cartas. La segunda coordenada sí se mantiene.
 
+    6. Animation.onComplete
 
-       
+    PENDIENTE:
+    - podria evitar que J1 hiciera trampas llamando a una funcion extra elegir, tal y como cuando se elige la 2da carta del timador
+    - A veces dice que has echado una carta que no has echado (echas cura y hace accion de principe - comprobar si el principe está en la otra mano)
+    - El array de acusaciones que esta en orden podría cambiarse por otro con los nombres mas propables repetidos y sin guardia. Así no sería
+      necesario el bucle !=1 y mejoraría la IA.
 
 */
 
@@ -57,7 +63,7 @@ var mazo; //El mazo en sí
 var cartaMazo; //Representa la imagen del mazo.
 var indiceMazo = 0; //Para ir sacando las cartas del mazo, recorre todas las cartas
 var turnos = 0; //Aumenta cada vez que juega un jugador
-var numeroJugadores = 2; //Número entre 2 y 4.
+var numeroJugadores = 3; //Número entre 2 y 4.
 var turnoJugador; //A qué jugador le toca jugar
 
 var cartasManoJugadores = []; //Las cartas que tienen los jugadores en mano
@@ -69,6 +75,7 @@ var canPlay = true; //Determina si es el turno del siguiente jugador
 var finReparto = false; //Utilizada para hacer el reparto inicial automático.
 
 var jugadoresVivos = numeroJugadores;
+var personajesOrden = ["Asesino", "Guardia", "Timador", "Cura", "Baron", "Baronesa", "Mayordomo", "Criada", "Principe", "Rey", "Condesa", "Pricesa"];
 
 //Posiciones para repartir las cartas. Facilita la lectura del código
 var posManoJ1 = [gameOptions.gameWidth-gameOptions.cardSheetWidth/2, gameOptions.gameHeight-gameOptions.cardSheetHeight/2];
@@ -105,7 +112,7 @@ function create() {
         cartaDescarteJugadores[i].vivo = true;
         cartaDescarteJugadores[i].protegido = false;
      }
-     
+
 }
 
 
@@ -207,18 +214,18 @@ function animacionRepartir(carta, tipo, jugadorReceptor){
             tween = game.add.tween(carta).to({
                 x: posManoJugadores[0][0], 
                 y: posManoJugadores[0][1]
-            },500,Phaser.Easing.Cubic.Out, true);
+            },750,Phaser.Easing.Cubic.Out, true);
         }else{
             tween = game.add.tween(carta).to({
                 x: posManoJugadores[0][0]-gameOptions.cardSheetWidth-32,
                 y: posManoJugadores[0][1]
-            },500,Phaser.Easing.Cubic.Out, true);
+            },750,Phaser.Easing.Cubic.Out, true);
         } 
     }else{
         tween = game.add.tween(carta).to({
             x: posManoJugadores[jugadorReceptor][0], 
             y: posManoJugadores[jugadorReceptor][1]
-        },500,Phaser.Easing.Cubic.Out, true);
+        },750,Phaser.Easing.Cubic.Out, true);
     }
 }
 
@@ -269,7 +276,7 @@ function animacionDescartar(carta, indice){
     tween = game.add.tween(carta).to({
         x: posMesaJugadores[turnoJugador][0], 
         y: posMesaJugadores[turnoJugador][1]
-    },500,Phaser.Easing.Cubic.Out, true);
+    },750,Phaser.Easing.Cubic.Out, true);
     //Al terminar la animación, se cambia la imagen de descarte de jugadores.
     tween.onComplete.add(function() {
         //Se añade la imagen encima
@@ -280,13 +287,42 @@ function animacionDescartar(carta, indice){
     //No ha habido otro modo de eliminar la carta
     delete cartasManoJugadores[turnoJugador][indice];
 
-    game.time.events.add(500, accionCarta, this, carta, indice);
+    game.time.events.add(800, accionCarta, this, carta, indice);
 }
 
 function accionCarta(carta, indice){
 
     switch(carta.personaje){
+        case "Guardia":
+            if(turnoJugador === 0){
+                //No puede realizar la accion sobre sí mismo
+                for(var jugador=1; jugador<numeroJugadores; jugador++){
+                    if(cartaDescarteJugadores[jugador].vivo && !jugadorElegido)
+                        cartaDescarteJugadores[jugador].events.onInputUp.add(accionGuardia, this, 0, jugador);
+                }
+            }else{
+                var jugador = jugadorVivoAlAzar(false);
+                accionGuardia(undefined, undefined, undefined, jugador);
+            }
+            break;
 
+        case "Timador":
+            if(turnoJugador === 0){
+                //Puede realizar la accion sobre sí mismo
+                for(var jugador=0; jugador<numeroJugadores; jugador++){
+                    if(cartaDescarteJugadores[jugador].vivo && !jugadorElegido)
+                        cartaDescarteJugadores[jugador].events.onInputUp.add(accionTimador, this, 0, carta.personaje, jugador);
+                }
+            }else{
+                var jugador1 = jugadorVivoAlAzar(true);
+                //No puede elegir al mismo jugador las dos veces
+                do{
+                    var jugador2 = jugadorVivoAlAzar(true);
+                }while(jugador1===jugador2);
+
+                accionTimaRey(undefined, undefined, undefined, carta.personaje, jugador1, jugador2);
+            }
+            break;
         case "Cura":
             if(turnoJugador === 0){
                 //No puede realizar la accion sobre sí mismo
@@ -339,11 +375,11 @@ function accionCarta(carta, indice){
                 //No puede realizar la accion sobre sí mismo
                 for(var jugador=1; jugador<numeroJugadores; jugador++){
                     if(cartaDescarteJugadores[jugador].vivo && !jugadorElegido)
-                        cartaDescarteJugadores[jugador].events.onInputUp.add(accionTimaRey, this, 0, jugador);
+                        cartaDescarteJugadores[jugador].events.onInputUp.add(accionTimaRey, this, 0, carta.personaje, jugador);
                 }
             }else{
                 var jugador = jugadorVivoAlAzar(false);
-                accionTimaRey(undefined, undefined, undefined, jugador);
+                accionTimaRey(undefined, undefined, undefined, carta.personaje, jugador);
             }
             break;
 
@@ -360,11 +396,11 @@ function accionCarta(carta, indice){
 }
 
 //Self indica si en un principio el jugador puede elegirse a sí mismo.
-//Tal vez pueda simplificarse si está especificado en las acciones de cada uno                                      REVISAR!!!!!!!!!1
+//Tal vez pueda simplificarse si está especificado en las acciones de cada uno                                     
 function jugadorVivoAlAzar(self){
     var jugProts = 0;
     for(var i=0; i<numeroJugadores; i++){
-        if(cartaDescarteJugadores[i].protegido) jugProts++;
+        if(cartaDescarteJugadores[i].protegido || !cartaDescarteJugadores[i].vivo) jugProts++;
     }
 
     var numJug = Math.floor(Math.random()*numeroJugadores);
@@ -373,11 +409,11 @@ function jugadorVivoAlAzar(self){
             //De este modo no entrará en un bucle infinito buscando jugadores que no estén protegidos.
             //Como último recurso, actuará sobre sí mismo si todos están protegidos.
             if(jugProts>=numeroJugadores-1) return numJug; 
-            else return jugadorVivoAlAzar();
+            else return jugadorVivoAlAzar(self);
         }
         else return numJug;
     else
-        return jugadorVivoAlAzar();
+        return jugadorVivoAlAzar(self);
 }
 
 function finTurno(){
@@ -466,20 +502,144 @@ function manejadorTurnos(){
 
 
 function accionAsesino(){}
-function accionGuardia(){}
 
 
-function accionTimaRey(carta, a, b, jugador){
-    console.log("El jugador " + (turnoJugador+1)+" se ha cambiado las cartas con el jugador " + (jugador+1));
+function accionGuardia(carta, a, b, jugador){
+    jugadorElegido = true;
+    cartaDescarteJugadores[jugador].events.destroy();
+    //No puede acusarse a sí mismo
+    if(cartaDescarteJugadores[jugador].vivo && jugador!==turnoJugador && !cartaDescarteJugadores[jugador].protegido){
+        //Se determina a qué carta está acusando
+        var cartaAcusada;
+        if(cartasManoJugadores[jugador][0]!=undefined)
+            cartaAcusada = cartasManoJugadores[jugador][0].personaje;
+        else
+            cartaAcusada = cartasManoJugadores[jugador][1].personaje;
 
+        //De qué acusa (aleatorio para !J1)
+        var acusacion;
+        do{
+            var indice = Math.floor(Math.random()*9);
+        }while(indice === 1);
+        
+        acusacion = personajesOrden[indice];
 
+        if(cartaAcusada===acusacion){
+            cartaDescarteJugadores[jugador].vivo = false;
+            jugadoresVivos--;
+            console.log("El jugador " + (turnoJugador+1)+" ha acusado al jugador " + (jugador+1)+" de ser tener un/a "+acusacion+" y ha acertado.\nEl jugador "+(jugador+1)+" ha sido eliminado.");
+        }
 
+        console.log("El jugador " + (turnoJugador+1)+" ha acusado al jugador " + (jugador+1)+" de ser tener un/a "+acusacion+" y ha fallado.");
+    }else{
+        console.log("El jugador " + (turnoJugador+1)+" no ha podido acusar al jugador " + (jugador+1));
+    }
     
-    game.time.events.add(1000, finTurno);
+    game.time.events.add(2500, finTurno);
+}
+
+function accionTimador(carta, a, b, person, jugador1){
+    console.log("Elige al segundo jugador");
+    
+    //Puede realizar la accion sobre sí mismo
+    for(var jugador2=0; jugador2<numeroJugadores; jugador2++){
+        if(cartaDescarteJugadores[jugador2].vivo)
+            cartaDescarteJugadores[jugador2].events.onInputUp.add(accionTimaRey, this, 0, person, jugador1, jugador2);
+    }
+}
+
+function accionTimaRey(carta, a, b, person, jugador1, jugador2){
+    jugadorElegido = true;
+    cartaDescarteJugadores[jugador1].events.destroy();
+
+    if(person==="Rey")  jugador2 = turnoJugador;
+    else if(turnoJugador===0){
+
+        if(jugador1===jugador2){
+            console.log("Elige a otro jugador");
+            //Puede realizar la accion sobre sí mismo
+            for(var jugador=0; jugador<numeroJugadores; jugador++){
+                if(cartaDescarteJugadores[jugador].vivo && !jugadorElegido)
+                    cartaDescarteJugadores[jugador].events.onInputUp.add(accionTimador, this, 0, carta.personaje, jugador);
+            }
+        }
+
+        cartaDescarteJugadores[jugador2].events.destroy();
+    }
+
+
+
+    if(cartaDescarteJugadores[jugador1].vivo && jugador1!==jugador2 && !cartaDescarteJugadores[jugador1].protegido){
+        console.log("El jugador " + (jugador2+1)+" se ha cambiado las cartas con el jugador " + (jugador1+1));
+        
+        var idx_cambiado; //jugador cambiado (j1)
+        var idx_cambiadoR; //jugador cambiador (j2)
+        var carta_aux;
+
+        if(cartasManoJugadores[jugador1][0]!=undefined){
+            idx_cambiado = 0;
+        }else{
+            idx_cambiado = 1;
+        }
+        if(cartasManoJugadores[jugador2][0]!=undefined){
+            idx_cambiadoR = 0;
+        }else{
+            idx_cambiadoR = 1;
+        }
+
+        carta_aux = cartasManoJugadores[jugador1][idx_cambiado];                                //Puede dar problemas, cual es mi carta.
+
+        var tween1;//Primero el cambiado
+        var tween2;//Luego el cambiador
+        
+        //El cambiado le da su carta al cambiador
+        var pos_x = posManoJugadores[jugador2][0];
+        var pos_y = posManoJugadores[jugador2][1];
+
+        //Hay dos posiciones de cartas del J1
+        if(jugador2 === 0 && idx_cambiadoR===1){
+            pos_x = posManoJugadores[jugador2][0]-gameOptions.cardSheetWidth-32;
+            pos_y = posManoJugadores[jugador2][1];
+        }
+
+        tween1 = game.add.tween(cartasManoJugadores[jugador1][idx_cambiado]).to({
+            x: pos_x, 
+            y: pos_y
+        },1000,Phaser.Easing.Cubic.Out, true);
+        
+        //El cambiador le da su carta al cambiado
+        tween1.onComplete.add(function() {
+
+            pos_x = posManoJugadores[jugador1][0];
+            pos_y = posManoJugadores[jugador1][1];
+    
+            //Hay dos posiciones de cartas del J1
+            if(jugador1 === 0 && idx_cambiado===1){
+                pos_x = posManoJugadores[jugador1][0]-gameOptions.cardSheetWidth-32;
+                pos_y = posManoJugadores[jugador1][1];
+            }
+
+            tween2 = game.add.tween(cartasManoJugadores[jugador2][idx_cambiadoR]).to({
+                x: pos_x, 
+                y: pos_y
+            },1000,Phaser.Easing.Cubic.Out, true);
+            
+            tween2.onComplete.add(function() {
+                cartasManoJugadores[jugador1][idx_cambiado] = cartasManoJugadores[jugador2][idx_cambiadoR];
+                cartasManoJugadores[jugador2][idx_cambiadoR] = carta_aux;
+            });
+        });
+    }else{
+        console.log("El jugador " + (jugador2+1)+" no ha podido cambiarle la mano al jugador " + (jugador1+1));
+    }
+    
+
+    game.time.events.add(3500, finTurno);
 }
 
 function accionCura(carta, a, b, jugador){
     jugadorElegido = true;
+    cartaDescarteJugadores[jugador].events.destroy();
     //No puede verse la carta a sí mismo
     if(cartaDescarteJugadores[jugador].vivo && jugador!==turnoJugador && !cartaDescarteJugadores[jugador].protegido){
         var pvisto;
@@ -499,6 +659,7 @@ function accionCura(carta, a, b, jugador){
 
 function accionBaronBaronesa(carta, a, b, jugador, person){
     jugadorElegido = true;
+    cartaDescarteJugadores[jugador].events.destroy();
 
     if(cartaDescarteJugadores[jugador].vivo && jugador!==turnoJugador && !cartaDescarteJugadores[jugador].protegido){
         var retado; //jugador retado
@@ -539,12 +700,14 @@ function accionBaronBaronesa(carta, a, b, jugador, person){
         console.log("El jugador " + (turnoJugador+1)+" no ha podido compararse con el jugador " + (jugador+1));
     }
     
-    game.time.events.add(1000, finTurno);
+    game.time.events.add(2500, finTurno);
 
 }
 
 function accionPrincipe(carta, a, b, jugador){
     jugadorElegido = true;
+    cartaDescarteJugadores[jugador].events.destroy();
+
     if(cartaDescarteJugadores[jugador].vivo && !cartaDescarteJugadores[jugador].protegido){
         var carta; //La carta de la que se tiene que descartar
         var indice;
@@ -567,7 +730,7 @@ function accionPrincipe(carta, a, b, jugador){
             tween = game.add.tween(carta).to({
                 x: posMesaJugadores[jugador][0], 
                 y: posMesaJugadores[jugador][1]
-            },500,Phaser.Easing.Cubic.Out, true);
+            },1000,Phaser.Easing.Cubic.Out, true);
             //Al terminar la animación, se cambia la imagen de descarte de jugadores.
             tween.onComplete.add(function() {
                 //Se añade la imagen encima
@@ -595,5 +758,5 @@ function accionPrincipe(carta, a, b, jugador){
     }else{
         console.log("El jugador " + (turnoJugador+1)+" no ha podido hacer descartarse al jugador " + (jugador+1));
     }
-    game.time.events.add(1000, finTurno);
+    game.time.events.add(2500, finTurno);
 }
