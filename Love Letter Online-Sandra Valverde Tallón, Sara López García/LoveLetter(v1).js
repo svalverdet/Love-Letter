@@ -1,14 +1,16 @@
 /*
-    ENTREGA 8: más efectos añadidos.
-    - Efecto Timador terminado.
-    - Efecto Rey terminado.
-    - Efecto Guardia empezado.
+    ENTREGA 9: guardia terminado + cuadro de ayuda + varios.
+    - Terminado guardia + botones añadidos. 
+    - Cuadro de ayuda hecho. 
+    - Hacer el descarte de la ultima carta una vez un jugador muere. 
+    - Cartas cubiertas/descubiertas.
     
-    Siguiente: depurar errores, terminar guardia y asesino, hacer el descarte de la ultima carta una vez un jugador muere.
+    Siguiente: hacer animaciones, cuadro de partida y rondas.
 
+    ENTREGA 10: botones terminados + animaciones + varios.
+    Varios: añadido escudo proteccion, oscurecimiento de la carta del jugador que pierde y solución de pequeños bugs.
 
-    ENTREGA 9: terminado guardia + botones añadidos. Cuadro de ayuda hecho. hacer el descarte de la ultima carta una vez un jugador muere. cartas cubiertas/descubiertas.
-    Ahora: hacer la animacion, habilitar los botones para el guardia.
+    Siguiente: asesino, cuadro de partida y rondas.
 
     1. Para pasar a pantalla completa basta con pulsar F11.
     2. He seguido el tutorial de Emanuele de Deck of cards management.
@@ -18,11 +20,10 @@
     5. Según como está el código, siempre va a empezar J1 (persona real). Para cambiarlo habría que asignar un índice al J1, en vez de
        acceder con [0][0] y [0][1] a sus cartas. La segunda coordenada sí se mantiene.
 
-    6. Animation.onComplete
-    7. al morir: sprite.alpha = 1; game.add.tween(sprite).to( { alpha: 0.5 }, 2000, Phaser.Easing.Linear.None, true, 0, 1000, true);
 
     PENDIENTE:
     - podria evitar que J1 hiciera trampas llamando a una funcion extra elegir, tal y como cuando se elige la 2da carta del timador
+        Solucionado con los inputEnable.
     - A veces dice que has echado una carta que no has echado (echas cura y hace accion de principe - comprobar si el principe está en la otra mano)
     - El array de acusaciones que esta en orden podría cambiarse por otro con los nombres mas propables repetidos y sin guardia. Así no sería
       necesario el bucle !=1 y mejoraría la IA.
@@ -40,14 +41,15 @@ var game = new Phaser.Game(gameOptions.gameWidth, gameOptions.gameHeight, Phaser
 
 function preload() {
 
-    game.load.image('mesa', 'assets/prueba/mesa.png');//mejor en el css como background
+    game.load.image('background', 'assets/prueba/mesa.png');
     game.load.image('carta', 'assets/prueba/Carta_atras_ok.png');
     game.load.image('descarte', 'assets/prueba/descarte.png');
     game.load.spritesheet('cartas1', 'assets/prueba/SpriteSheet1.png', gameOptions.cardSheetWidth, gameOptions.cardSheetHeight);
     game.load.spritesheet('cartas2', 'assets/prueba/SpriteSheet2.png', gameOptions.cardSheetWidth, gameOptions.cardSheetHeight);
-    game.load.spritesheet('boton', 'assets/prueba/button1NO.png', 265/2, 52);
-    game.load.image('cuadro', 'assets/prueba/cuadroNO.png');
+    game.load.spritesheet('boton', 'assets/prueba/botones.png', 265/2, 52);
+    game.load.image('cuadro', 'assets/prueba/ayuda.png');
     game.load.image('cerrar', 'assets/prueba/cerrarNO.png');
+    game.load.image('protegido', 'assets/prueba/prote.png')
 }
 
 //variables globales
@@ -87,7 +89,7 @@ var posBoton1 = [gameOptions.gameWidth-300, 32];
 
 var popupAyuda;
 var tweenAyuda = null;
-var textoAyudaOrden = ["Texto Asesino:\nResulta que el asesino blabla bla blabalabla blabalab nblabalbala.", "Texto Guardia", "Texto Timador", "Texto Cura", 
+var textoAyudaOrden = ["Texto Asesino:\nResulta que el asesino blabla bla blabalabla blabalab nblabalaa aaaaa aa a aaaa  aa  aaaaa bala.", "Texto Guardia", "Texto Timador", "Texto Cura", 
                         "Texto Baron", "Texto Baronesa", "Texto Mayordomo", "Texto Criada", 
                         "Texto Principe", "Texto Rey", "Texto Condesa", "Texto Princesa"];
 var textoAyuda;
@@ -101,6 +103,7 @@ function create() {
     //Cargar como fondo
     //game.add.sprite(0, 0, 'mesa');
     game.stage.backgroundColor = "#c73a3a";
+    game.add.tileSprite(0, 0, gameOptions.gameWidth, gameOptions.gameHeight, 'background');
     //Centrar el juego en la pantalla
     this.game.scale.pageAlignHorizontally = true;this.game.scale.pageAlignVertically = true;this.game.scale.refresh();
     
@@ -123,17 +126,23 @@ function create() {
         cartaDescarteJugadores[i].protegido = false;
      }
 
+     var estiloBoton;
+     
     //Botones para el guardia y para la ayuda
     for(var btn=0; btn<12; btn++){
         botones[btn] = game.add.button(posBoton1[0]+(140)*Math.floor(btn/6), posBoton1[1]+(60)*btn-(60*6)*Math.floor(btn/6), 'boton', undefined, undefined, 1, 0);
         botones[btn].events.onInputDown.add(abrirAyuda, this, 0, btn);
         botones[btn].useHandCursor = true;
+        estiloBoton = { font: "bold 17px Waverly", fill:"#AAAAAA", wordWrap: true, wordWrapWidth: botones[btn].width-15, align: "center"};
+        var textoBoton = game.add.text(botones[btn].width/2, botones[btn].height/2+3, personajesOrden[btn], estiloBoton);
+        textoBoton.anchor.set(0.5);
+        botones[btn].addChild(textoBoton);
     }
 
 
 
     //Para la ventana de ayuda
-    popupAyuda = game.add.sprite(40, 40, 'cuadro');
+    popupAyuda = game.add.sprite(20, 20, 'cuadro');
     popupAyuda.alpha = 0.8;
 
     //Boton de cerrar ayuda
@@ -151,7 +160,7 @@ function create() {
     popupAyuda.addChild(cerrar);
     
     //Se añade el texto
-    var style = { font: "16px Arial", wordWrap: true, wordWrapWidth: popupAyuda.width, align: "center"};
+    var style = { font: "18px Arial", fill:"#FFFFFF", wordWrap: true, wordWrapWidth: popupAyuda.width-75, align: "center"};
     textoAyuda = game.add.text(popupAyuda.width/2, popupAyuda.height/2, " ", style);
     textoAyuda.anchor.set(0.5);
     popupAyuda.addChild(textoAyuda);
@@ -162,15 +171,15 @@ function create() {
 }
 
 function abrirAyuda(a, b, indice){
-    textoAyuda.setText(textoAyudaOrden[indice]);
+    
     if(!(guardiaActivo && turnoJugador===0)){
         if ((tweenAyuda !== null && tweenAyuda.isRunning) || popupAyuda.scale.x === 1)
         {
             return;
         }
-        
+        textoAyuda.setText(textoAyudaOrden[indice]);
         //La ventana se abre sólo si ya está abierta o abriéndose
-        tweenAyuda = game.add.tween(popupAyuda.scale).to( { x: 1, y: 1 }, 1000, Phaser.Easing.Elastic.Out, true);
+        tweenAyuda = game.add.tween(popupAyuda.scale).to( { x: 0.8, y: 0.8 }, 1000, Phaser.Easing.Elastic.Out, true);
 
     } 
 }
@@ -285,7 +294,7 @@ function sacarCartaMazo(jugadorReceptor) {
 function animacionRepartir(carta, tipo, jugadorReceptor){
     carta.angle = 0; 
     //Se "da la vuelta" a la carta, revelando el personaje. Sólo para el J1
-    if(turnoJugador===0)                                                                                //UNCOMMENT  
+    if(turnoJugador===0 || jugadorReceptor===0)                    
         carta.loadTexture('cartas1', tipo); 
     
     var tween;
@@ -369,10 +378,13 @@ function animacionDescartar(carta, indice){
     //No ha habido otro modo de eliminar la carta
     delete cartasManoJugadores[turnoJugador][indice];
 
-    game.time.events.add(800, accionCarta, this, carta, indice);
+    game.time.events.add(1500, accionCarta, this, carta, indice);
 }
 
 function accionCarta(carta, indice){
+    //.loadTexture('cartas2', cartaDescarteJugadores[turnoJugador].tipoframe);
+    var im_temp = game.add.image(posMesaJugadores[turnoJugador][0], posMesaJugadores[turnoJugador][1], 'cartas2', carta.tipoframe);
+    im_temp.anchor.setTo(0.5, 0.5);
 
     switch(carta.personaje){
         case "Guardia":
@@ -435,7 +447,12 @@ function accionCarta(carta, indice){
 
         case "Criada":
         case "Mayordomo":
-            cartaDescarteJugadores[turnoJugador].protegido=true;
+            cartaDescarteJugadores[turnoJugador].protegido = true;
+            cartaDescarteJugadores[turnoJugador].inputEnabled = false;
+            var img_tp = game.add.image(posMesaJugadores[turnoJugador][0], posMesaJugadores[turnoJugador][1], 'protegido');
+            img_tp.alpha = 0;
+            img_tp.anchor.setTo(0.5, 0.5);
+            game.add.tween(img_tp).to( { alpha: 0.7 }, 2000, Phaser.Easing.Linear.None, true);
             console.log("El jugador "+(turnoJugador+1) + " se ha protegido.");
             game.time.events.add(1000, finTurno);
             break;
@@ -560,6 +577,7 @@ function manejadorTurnos(){
             for(var i=0; i<numeroJugadores; i++){
                 if(cartaDescarteJugadores[i].protegido && i==turnoJugador){
                     cartaDescarteJugadores[i].protegido = false;
+                    cartaDescarteJugadores[i].inputEnabled = true;
                     console.log("El jugador "+(turnoJugador+1) +" ya no está protegido.");
                 }
             }
@@ -591,6 +609,9 @@ function manejadorTurnos(){
 
 function echarCartaDerrotados(carta, jugador){
     var tween;
+    var tweenOsc;
+    var capaOscura;
+    
     tween = game.add.tween(carta).to({
         x: posMesaJugadores[jugador][0], 
         y: posMesaJugadores[jugador][1]
@@ -600,6 +621,11 @@ function echarCartaDerrotados(carta, jugador){
         //Se añade la imagen encima
         var im_temp = game.add.image(posMesaJugadores[jugador][0], posMesaJugadores[jugador][1], 'cartas1', carta.tipoframe);
         im_temp.anchor.setTo(0.5, 0.5);
+        
+        capaOscura = game.add.graphics(0,0);
+        capaOscura.beginFill("#000000", 0.6);
+        capaOscura.drawRect(posMesaJugadores[jugador][0]-gameOptions.cardSheetWidth/2, posMesaJugadores[jugador][1]-gameOptions.cardSheetHeight/2, gameOptions.cardSheetWidth, gameOptions.cardSheetHeight);
+        capaOscura.endFill();
     });
 }
 
@@ -619,7 +645,8 @@ function accionGuardia(carta, a, b, jugador, btn){
         jugadorElegido = true;
         cartaDescarteJugadores[jugador].events.destroy();
         //No puede acusarse a sí mismo
-        if(cartaDescarteJugadores[jugador].vivo && jugador!==turnoJugador && !cartaDescarteJugadores[jugador].protegido){
+        if(cartaDescarteJugadores[jugador].vivo && !cartaDescarteJugadores[jugador].protegido){
+        //if(cartaDescarteJugadores[jugador].vivo && jugador!==turnoJugador && !cartaDescarteJugadores[jugador].protegido){
             //Se determina a qué carta está acusando
             var cartaAcusada;
             if(cartasManoJugadores[jugador][0]!=undefined)
@@ -876,9 +903,13 @@ function accionPrincipe(carta, a, b, jugador){
             //Al terminar la animación, se cambia la imagen de descarte de jugadores.
             tween.onComplete.add(function() {
                 //Se añade la imagen encima
-                var im_temp = game.add.image(posMesaJugadores[jugador][0], posMesaJugadores[jugador][1], 'cartas1', carta.tipoframe);
+                if(carta.personaje==="Princesa")
+                    var im_temp = game.add.image(posMesaJugadores[jugador][0], posMesaJugadores[jugador][1], 'cartas2', carta.tipoframe);
+                else
+                    var im_temp = game.add.image(posMesaJugadores[jugador][0], posMesaJugadores[jugador][1], 'cartas1', carta.tipoframe);
                 im_temp.anchor.setTo(0.5, 0.5);
             }); 
+           
 
             console.log("El jugador " + (turnoJugador+1)+" ha hecho descartarse al jugador " + (jugador+1));
 
