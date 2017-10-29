@@ -1,16 +1,12 @@
 /*
-    ENTREGA 9: guardia terminado + cuadro de ayuda + varios.
-    - Terminado guardia + botones añadidos. 
-    - Cuadro de ayuda hecho. 
-    - Hacer el descarte de la ultima carta una vez un jugador muere. 
-    - Cartas cubiertas/descubiertas.
-    
-    Siguiente: hacer animaciones, cuadro de partida y rondas.
 
     ENTREGA 10: botones terminados + animaciones + varios.
     Varios: añadido escudo proteccion, oscurecimiento de la carta del jugador que pierde y solución de pequeños bugs.
 
     Siguiente: asesino, cuadro de partida y rondas.
+
+    ENTREGA 11: cuadro de partida + textos ayuda + Asesino.
+    
 
     1. Para pasar a pantalla completa basta con pulsar F11.
     2. He seguido el tutorial de Emanuele de Deck of cards management.
@@ -48,8 +44,9 @@ function preload() {
     game.load.spritesheet('cartas2', 'assets/prueba/SpriteSheet2.png', gameOptions.cardSheetWidth, gameOptions.cardSheetHeight);
     game.load.spritesheet('boton', 'assets/prueba/botones.png', 265/2, 52);
     game.load.image('cuadro', 'assets/prueba/ayuda.png');
-    game.load.image('cerrar', 'assets/prueba/cerrarNO.png');
-    game.load.image('protegido', 'assets/prueba/prote.png')
+    game.load.image('cerrar', 'assets/prueba/cerrar.png');
+    game.load.image('protegido', 'assets/prueba/prote.png');
+    game.load.image('eventos', 'assets/prueba/eventos.png');
 }
 
 //variables globales
@@ -69,7 +66,7 @@ var canPlay = true; //Determina si es el turno del siguiente jugador
 var finReparto = false; //Utilizada para hacer el reparto inicial automático.
 
 var jugadoresVivos = numeroJugadores;
-var personajesOrden = ["Asesino", "Guardia", "Timador", "Cura", "Baron", "Baronesa", "Mayordomo", "Criada", "Principe", "Rey", "Condesa", "Pricesa"];
+var personajesOrden = ["Asesino", "Guardia", "Timador", "Cura", "Baron", "Baronesa", "Mayordomo", "Criada", "Principe", "Rey", "Condesa", "Princesa"];
 var guardiaActivo = false;
 
 //Posiciones para repartir las cartas. Facilita la lectura del código
@@ -89,19 +86,19 @@ var posBoton1 = [gameOptions.gameWidth-300, 32];
 
 var popupAyuda;
 var tweenAyuda = null;
-var textoAyudaOrden = ["Texto Asesino:\nResulta que el asesino blabla bla blabalabla blabalab nblabalaa aaaaa aa a aaaa  aa  aaaaa bala.", "Texto Guardia", "Texto Timador", "Texto Cura", 
-                        "Texto Baron", "Texto Baronesa", "Texto Mayordomo", "Texto Criada", 
-                        "Texto Principe", "Texto Rey", "Texto Condesa", "Texto Princesa"];
+var textoAyudaOrden = ["Asesino(2):\nSi ganas con él, tus corazones se pondrán a 0. ¡La princesa cree que quieres matarla!\nValor: 0.", "Guardia(8):\nAcusa a otro jugador. Si tu acusación es correcta, ese jugador pierde.\nNo puedes acusar de Guardia.\nValor: 1.", "Timador(2):\nElige a dos jugadores. Estos se cambiarán las cartas.\nPuedes elegirte a ti mismo.\nValor: 2.", "Cura(4):\nMira la mano de otro jugador.\nValor: 2.", 
+                        "Baron(2):\nReta a otro jugador. Aquel con el valor de carta MÁS BAJO PIERDE.\nValor: 3", "Baronesa(1):\nReta a otro jugador. Aquel con el valor de carta MÁS ALTO PIERDE.\nValor: 3", "Mayordomo(1):\nIgual que la Criada.\nSi ganas con él al final de la ronda, ganarás 2 CORAZONES.\nValor: 4", "Criada(2):\nDurante una ronda nadie podrá realizar acciones sobre ti.\nValor: 4.", 
+                        "Principe(3):\nElige a un jugador para que descarte su carta, incluso a ti mismo.\nValor: 5", "Rey(1):\nIntercambia TU mano con la de otro jugador.\nValor: 6", "Condesa(1):\nSe descartará automáticamente si en tu mano hay además un Príncipe o un Rey.\nValor: 7", "Princesa(1):\nEl jugador que la descarte pierde.\nValor: 8"];
 var textoAyuda;
 
 var cuadroPartida;
 var textoPartida;
+var textoEventosPartida = ["NUEVA PARTIDA\nJugador 1, te toca empezar.", "Descarta una de tus cartas.", " "];
 
 
 function create() {
     
     //Cargar como fondo
-    //game.add.sprite(0, 0, 'mesa');
     game.stage.backgroundColor = "#c73a3a";
     game.add.tileSprite(0, 0, gameOptions.gameWidth, gameOptions.gameHeight, 'background');
     //Centrar el juego en la pantalla
@@ -124,6 +121,7 @@ function create() {
         cartaDescarteJugadores[i].inputEnabled=true;
         cartaDescarteJugadores[i].vivo = true;
         cartaDescarteJugadores[i].protegido = false;
+        cartaDescarteJugadores[i].corazones = 0;
      }
 
      var estiloBoton;
@@ -146,8 +144,8 @@ function create() {
     popupAyuda.alpha = 0.8;
 
     //Boton de cerrar ayuda
-    var pw = (popupAyuda.width) - 38;
-    var ph = 8;
+    var pw = (popupAyuda.width) - 70;
+    var ph = popupAyuda.y;
 
     //Clicar el boton para cerrar la ayuda
     var cerrar = game.make.sprite(pw, ph, 'cerrar');
@@ -160,13 +158,25 @@ function create() {
     popupAyuda.addChild(cerrar);
     
     //Se añade el texto
-    var style = { font: "18px Arial", fill:"#FFFFFF", wordWrap: true, wordWrapWidth: popupAyuda.width-75, align: "center"};
+    var style = { font: "18px Waverly", fill:"#FFFFFF", wordWrap: true, wordWrapWidth: popupAyuda.width-75, align: "center"};
     textoAyuda = game.add.text(popupAyuda.width/2, popupAyuda.height/2, " ", style);
     textoAyuda.anchor.set(0.5);
     popupAyuda.addChild(textoAyuda);
 
     //Se esconde
     popupAyuda.scale.set(0.1);
+
+
+
+    //Para la ventana de eventos de partida
+    cuadroPartida = game.add.sprite(20, 375, 'eventos');
+    cuadroPartida.alpha = 0.8;
+    //cuadroPartida.scale.setTo(1.2, 1.2);
+
+    var style2 = { font: "bold 15px Waverly", fill:"#FFFFFF", wordWrap: true, wordWrapWidth: cuadroPartida.width-75, align: "left"};
+    textoPartida = game.add.text(cuadroPartida.width/2, cuadroPartida.height/2, textoEventosPartida[0]+"\n"+textoEventosPartida[1]+"\n"+textoEventosPartida[2], style2);
+    textoPartida.anchor.set(0.5);
+    cuadroPartida.addChild(textoPartida);
 
 }
 
@@ -320,7 +330,7 @@ function animacionRepartir(carta, tipo, jugadorReceptor){
 
 
 function update(){ 
-   
+    textoPartida.setText(textoEventosPartida[0]+"\n"+textoEventosPartida[1]+"\n"+textoEventosPartida[2]);
     //Si es el turno del siguiente jugador, se comprueba qué hacer
     if(canPlay){
         canPlay = false;
@@ -390,6 +400,8 @@ function accionCarta(carta, indice){
         case "Guardia":
             guardiaActivo = true;    
             if(turnoJugador === 0){
+                textoEventosPartida.shift();
+                textoEventosPartida.push("Pincha sobre el jugador al que quieras acusar.");
                 //No puede realizar la accion sobre sí mismo
                 for(var jugador=1; jugador<numeroJugadores; jugador++){
                     if(cartaDescarteJugadores[jugador].vivo && !jugadorElegido)
@@ -403,6 +415,8 @@ function accionCarta(carta, indice){
 
         case "Timador":
             if(turnoJugador === 0){
+                textoEventosPartida.shift();
+                textoEventosPartida.push("Pincha sobre un jugador al que quieras cambiarle la carta.");
                 //Puede realizar la accion sobre sí mismo
                 for(var jugador=0; jugador<numeroJugadores; jugador++){
                     if(cartaDescarteJugadores[jugador].vivo && !jugadorElegido)
@@ -420,6 +434,8 @@ function accionCarta(carta, indice){
             break;
         case "Cura":
             if(turnoJugador === 0){
+                textoEventosPartida.shift();
+                textoEventosPartida.push("Pincha sobre el jugador al que quieras verle las cartas.");
                 //No puede realizar la accion sobre sí mismo
                 for(var jugador=1; jugador<numeroJugadores; jugador++){
                     if(cartaDescarteJugadores[jugador].vivo && !jugadorElegido)
@@ -434,6 +450,8 @@ function accionCarta(carta, indice){
         case "Baron":
         case "Baronesa":
             if(turnoJugador === 0){
+                textoEventosPartida.shift();
+                textoEventosPartida.push("Pincha sobre el jugador al que quieras retar.");
                 //No puede realizar la accion sobre sí mismo
                 for(var jugador=1; jugador<numeroJugadores; jugador++){
                     if(cartaDescarteJugadores[jugador].vivo && !jugadorElegido)
@@ -448,17 +466,21 @@ function accionCarta(carta, indice){
         case "Criada":
         case "Mayordomo":
             cartaDescarteJugadores[turnoJugador].protegido = true;
-            cartaDescarteJugadores[turnoJugador].inputEnabled = false;
+            //cartaDescarteJugadores[turnoJugador].inputEnabled = false;
             var img_tp = game.add.image(posMesaJugadores[turnoJugador][0], posMesaJugadores[turnoJugador][1], 'protegido');
             img_tp.alpha = 0;
             img_tp.anchor.setTo(0.5, 0.5);
             game.add.tween(img_tp).to( { alpha: 0.7 }, 2000, Phaser.Easing.Linear.None, true);
             console.log("El jugador "+(turnoJugador+1) + " se ha protegido.");
+            textoEventosPartida.shift();
+            textoEventosPartida.push("El jugador "+(turnoJugador+1) + " se ha protegido.");
             game.time.events.add(1000, finTurno);
             break;
 
         case "Principe":
             if(turnoJugador === 0){
+                textoEventosPartida.shift();
+                textoEventosPartida.push("Pincha sobre el jugador que quieres que se descarte.");
                 //Sí puede realizar la accion sobre sí mismo
                 for(var jugador=0; jugador<numeroJugadores; jugador++){
                     if(cartaDescarteJugadores[jugador].vivo && !jugadorElegido)
@@ -472,6 +494,8 @@ function accionCarta(carta, indice){
 
         case "Rey":
             if(turnoJugador === 0){
+                textoEventosPartida.shift();
+                textoEventosPartida.push("Pincha sobre el jugador con el que quieres cambiarte la carta.");
                 //No puede realizar la accion sobre sí mismo
                 for(var jugador=1; jugador<numeroJugadores; jugador++){
                     if(cartaDescarteJugadores[jugador].vivo && !jugadorElegido)
@@ -493,6 +517,8 @@ function accionCarta(carta, indice){
                 game.time.events.add(750, echarCartaDerrotados, this, cartasManoJugadores[turnoJugador][0], turnoJugador);
             
             console.log("El jugador "+(turnoJugador+1) + " ha perdido tras descartar a la princesa.");
+            textoEventosPartida.shift();
+            textoEventosPartida.push("El jugador "+(turnoJugador+1) + " ha perdido tras descartar a la princesa.");
             game.time.events.add(3250, finTurno);
             break;
 
@@ -535,7 +561,61 @@ function finTurno(){
     }
 }
 
-function finPartida(){}
+function finPartida(){
+    textoEventosPartida.shift();
+    textoEventosPartida.push("La partida ha terminado. ¡El ganador es...");
+
+    if(jugadoresVivos>1){
+        var cartaMasAlta=0;
+        var jGanador;
+
+        for(var i=0; i<numeroJugadores; i++){
+            var carta;
+            if(cartaDescarteJugadores[i].vivo){
+                if(cartasManoJugadores[i][0]!=undefined){
+                    carta = cartasManoJugadores[i][0];
+                }
+                else{
+                    carta = cartasManoJugadores[i][1];
+                }
+            
+                if(carta.valor>cartaMasAlta){
+                    jGanador = i;
+                }
+            }
+        }
+
+        if(carta.personaje==="Mayordomo") cartaDescarteJugadores[jGanador].corazones +=2;
+        else if(carta.personaje==="Asesino")  cartaDescarteJugadores[jGanador].corazones=0;
+        else cartaDescarteJugadores[jGanador].corazones++;
+
+        textoEventosPartida.shift();
+        textoEventosPartida.push("...el jugador "+(jGanador+1)+" !");
+
+    }
+    else{
+        var jVivo;
+        var carta;
+        for(var i=0; i<numeroJugadores; i++){
+            if(cartaDescarteJugadores[i].vivo){
+                jVivo=i;
+            }
+        }
+        if(cartasManoJugadores[jVivo][0]!=undefined){
+            carta = cartasManoJugadores[jVivo][0];
+        }
+        else{
+            carta = cartasManoJugadores[jVivo][1];
+        }
+        
+        if(carta.personaje==="Mayordomo") cartaDescarteJugadores[jVivo].corazones +=2;
+        else if(carta.personaje==="Asesino")  cartaDescarteJugadores[jVivo].corazones=0;
+        else cartaDescarteJugadores[jVivo].corazones++;
+
+        textoEventosPartida.shift();
+        textoEventosPartida.push("...el jugador "+(jVivo+1)+" !");
+    }
+}
 
 
 function manejadorTurnos(){
@@ -579,6 +659,8 @@ function manejadorTurnos(){
                     cartaDescarteJugadores[i].protegido = false;
                     cartaDescarteJugadores[i].inputEnabled = true;
                     console.log("El jugador "+(turnoJugador+1) +" ya no está protegido.");
+                    textoEventosPartida.shift();
+                    textoEventosPartida.push("El jugador "+(turnoJugador+1) +" ya no está protegido.");
                 }
             }
 
@@ -633,7 +715,9 @@ function echarCartaDerrotados(carta, jugador){
 function accionAsesino(){}
 
 function eleccionGuardia(carta, a, b, jugador){
-    console.log("Elige de qué quieres acusar al jugador "+(jugador-1));
+    console.log("Elige de qué quieres acusar al jugador "+(jugador+1));
+    textoEventosPartida.shift();
+    textoEventosPartida.push("Elige de qué quieres acusar al jugador "+(jugador+1) + " pulsando un botón.");
     
     //Puede realizar la accion sobre sí mismo
     for(var btn=0; btn<botones.length;btn++)
@@ -645,8 +729,8 @@ function accionGuardia(carta, a, b, jugador, btn){
         jugadorElegido = true;
         cartaDescarteJugadores[jugador].events.destroy();
         //No puede acusarse a sí mismo
-        if(cartaDescarteJugadores[jugador].vivo && !cartaDescarteJugadores[jugador].protegido){
-        //if(cartaDescarteJugadores[jugador].vivo && jugador!==turnoJugador && !cartaDescarteJugadores[jugador].protegido){
+        //if(cartaDescarteJugadores[jugador].vivo && !cartaDescarteJugadores[jugador].protegido){
+        if(cartaDescarteJugadores[jugador].vivo && jugador!==turnoJugador && !cartaDescarteJugadores[jugador].protegido){
             //Se determina a qué carta está acusando
             var cartaAcusada;
             if(cartasManoJugadores[jugador][0]!=undefined)
@@ -676,15 +760,27 @@ function accionGuardia(carta, a, b, jugador, btn){
                         game.time.events.add(750, echarCartaDerrotados, this, cartaAcusada, jugador);
                 
                     console.log("El jugador " + (turnoJugador+1)+" ha acusado al jugador " + (jugador+1)+" de tener un/a "+acusacion+" y ha acertado.\nEl jugador "+(jugador+1)+" ha sido eliminado.");
+                    textoEventosPartida.shift();
+                    textoEventosPartida.push("El jugador " + (turnoJugador+1)+" ha acusado al jugador " + (jugador+1)+" de tener un/a "+acusacion+" y ha acertado.");
+                    textoEventosPartida.shift();
+                    textoEventosPartida.push("El jugador "+(jugador+1)+" ha sido eliminado.");
+                    
                 }
-                else 
+                else {
                     console.log("El jugador " + (turnoJugador+1)+" ha acusado al jugador " + (jugador+1)+" de tener un/a "+acusacion+" y ha fallado.");
+                    textoEventosPartida.shift();
+                    textoEventosPartida.push("El jugador " + (turnoJugador+1)+" ha acusado al jugador " + (jugador+1)+" de tener un/a "+acusacion+" y ha fallado.");
+                }
             }else{
-                console.log("No puedes acusar de Guardia a otro jugador.")
+                console.log("No puedes acusar de Guardia a otro jugador.");
+                textoEventosPartida.shift();
+                textoEventosPartida.push("No puedes acusar de Guardia a otro jugador.");
             }
 
         }else{
             console.log("El jugador " + (turnoJugador+1)+" no ha podido acusar al jugador " + (jugador+1));
+            textoEventosPartida.shift();
+            textoEventosPartida.push("El jugador " + (turnoJugador+1)+" no ha podido acusar al jugador " + (jugador+1));
         }
         
         game.time.events.add(3250, finTurno);
@@ -692,6 +788,8 @@ function accionGuardia(carta, a, b, jugador, btn){
 }
 
 function accionTimador(carta, a, b, person, jugador1){
+    textoEventosPartida.shift();
+    textoEventosPartida.push("Elige al segundo jugador.");
     console.log("Elige al segundo jugador");
     
     //Puede realizar la accion sobre sí mismo
@@ -710,6 +808,9 @@ function accionTimaRey(carta, a, b, person, jugador1, jugador2){
 
         if(jugador1===jugador2){
             console.log("Elige a otro jugador");
+            textoEventosPartida.shift();
+            textoEventosPartida.push("Elige a otro jugador.");
+
             //Puede realizar la accion sobre sí mismo
             for(var jugador=0; jugador<numeroJugadores; jugador++){                                     //Podría interferir con la llamada a siguiente turno de abajo
                 if(cartaDescarteJugadores[jugador].vivo && !jugadorElegido)
@@ -723,7 +824,9 @@ function accionTimaRey(carta, a, b, person, jugador1, jugador2){
 
 
     if(cartaDescarteJugadores[jugador1].vivo && jugador1!==jugador2 && !cartaDescarteJugadores[jugador1].protegido){
-        console.log("El jugador " + (jugador2+1)+" se ha cambiado las cartas con el jugador " + (jugador1+1));
+        console.log("El jugador " + (jugador2+1)+" se ha cambiado las cartas con el jugador " + (jugador1+1)+".");
+        textoEventosPartida.shift();
+        textoEventosPartida.push("El jugador " + (jugador2+1)+" se ha cambiado las cartas con el jugador " + (jugador1+1)+".");
         
         var idx_cambiado; //jugador cambiado (j1)
         var idx_cambiadoR; //jugador cambiador (j2)
@@ -789,6 +892,8 @@ function accionTimaRey(carta, a, b, person, jugador1, jugador2){
         });
     }else{
         console.log("El jugador " + (jugador2+1)+" no ha podido cambiarle la mano al jugador " + (jugador1+1));
+        textoEventosPartida.shift();
+        textoEventosPartida.push("El jugador " + (jugador2+1)+" no ha podido cambiarle la mano al jugador " + (jugador1+1)+".");
     }
     
 
@@ -806,10 +911,20 @@ function accionCura(carta, a, b, jugador){
         else
             pvisto = cartasManoJugadores[jugador][1].personaje;
 
-        if(turnoJugador===0) console.log("El jugador " + (jugador+1) + " tiene un/a: " + pvisto);
-        else console.log("El jugador " + (turnoJugador+1)+" le ha visto la mano al jugador " + (jugador+1));
+        if(turnoJugador===0) {
+            console.log("El jugador " + (jugador+1) + " tiene un/a: " + pvisto);
+            textoEventosPartida.shift();
+            textoEventosPartida.push("El jugador " + (jugador+1) + " tiene un/a: " + pvisto);
+        }
+        else {
+            console.log("El jugador " + (turnoJugador+1)+" le ha visto la mano al jugador " + (jugador+1));
+            textoEventosPartida.shift();
+            textoEventosPartida.push("El jugador " + (turnoJugador+1)+" le ha visto la mano al jugador " + (jugador+1));
+        }
     }else{
         console.log("El jugador " + (turnoJugador+1)+" no ha podido verle la mano al jugador " + (jugador+1));
+        textoEventosPartida.shift();
+        textoEventosPartida.push("El jugador " + (turnoJugador+1)+" no ha podido verle la mano al jugador " + (jugador+1));
     }
     
     game.time.events.add(1000, finTurno);
@@ -840,6 +955,8 @@ function accionBaronBaronesa(carta, a, b, jugador, person){
         }
 
         console.log("El jugador " + (turnoJugador+1)+" ha retado al jugador " + (jugador+1)+ " usando el/la "+person);
+        textoEventosPartida.shift();
+        textoEventosPartida.push("El jugador " + (turnoJugador+1)+" ha retado al jugador " + (jugador+1)+ " usando el/la "+person+".");
 
 
         //Gana el retado
@@ -850,6 +967,8 @@ function accionBaronBaronesa(carta, a, b, jugador, person){
             
             cartaDescarteJugadores[turnoJugador].vivo = false;
             console.log("El jugador " + (jugador+1)+" ha salido victorioso."); 
+            textoEventosPartida.shift();
+            textoEventosPartida.push("El jugador " + (jugador+1)+" ha salido victorioso.");
             
         //Gana el retador
         }else if((retado.valor<retadoR.valor && person==="Baron") || (retado.valor>retadoR.valor && person==="Baronesa")){
@@ -859,14 +978,20 @@ function accionBaronBaronesa(carta, a, b, jugador, person){
 
             cartaDescarteJugadores[jugador].vivo = false;
             console.log("El jugador " + (turnoJugador+1)+" ha salido victorioso.");
+            textoEventosPartida.shift();
+            textoEventosPartida.push("El jugador " + (turnoJugador+1)+" ha salido victorioso.");
 
         //Hay empate
         }else{
            console.log("¡Parece que ha habido un empate!");
+           textoEventosPartida.shift();
+           textoEventosPartida.push("¡Parece que ha habido un empate!");
         }
 
     }else{
         console.log("El jugador " + (turnoJugador+1)+" no ha podido compararse con el jugador " + (jugador+1));
+        textoEventosPartida.shift();
+        textoEventosPartida.push("El jugador " + (turnoJugador+1)+" no ha podido compararse con el jugador " + (jugador+1));
     }
     
     game.time.events.add(3250, finTurno);
@@ -896,6 +1021,7 @@ function accionPrincipe(carta, a, b, jugador){
 
         function principeDescartar(){
             var tween;
+            
             tween = game.add.tween(carta).to({
                 x: posMesaJugadores[jugador][0], 
                 y: posMesaJugadores[jugador][1]
@@ -903,8 +1029,13 @@ function accionPrincipe(carta, a, b, jugador){
             //Al terminar la animación, se cambia la imagen de descarte de jugadores.
             tween.onComplete.add(function() {
                 //Se añade la imagen encima
-                if(carta.personaje==="Princesa")
+                if(carta.personaje==="Princesa"){
                     var im_temp = game.add.image(posMesaJugadores[jugador][0], posMesaJugadores[jugador][1], 'cartas2', carta.tipoframe);
+                    var capaOscura = game.add.graphics(0,0);
+                    capaOscura.beginFill("#000000", 0.6);
+                    capaOscura.drawRect(posMesaJugadores[jugador][0]-gameOptions.cardSheetWidth/2, posMesaJugadores[jugador][1]-gameOptions.cardSheetHeight/2, gameOptions.cardSheetWidth, gameOptions.cardSheetHeight);
+                    capaOscura.endFill();
+                }
                 else
                     var im_temp = game.add.image(posMesaJugadores[jugador][0], posMesaJugadores[jugador][1], 'cartas1', carta.tipoframe);
                 im_temp.anchor.setTo(0.5, 0.5);
@@ -912,11 +1043,15 @@ function accionPrincipe(carta, a, b, jugador){
            
 
             console.log("El jugador " + (turnoJugador+1)+" ha hecho descartarse al jugador " + (jugador+1));
+            textoEventosPartida.shift();
+            textoEventosPartida.push("El jugador " + (turnoJugador+1)+" ha hecho descartarse al jugador " + (jugador+1));
 
             if(carta.personaje==="Princesa"){
                 cartaDescarteJugadores[jugador].vivo = false;
                 jugadoresVivos--;
                 console.log("El jugador "+(jugador+1) + " ha perdido tras descartar a la princesa.");
+                textoEventosPartida.shift();
+                textoEventosPartida.push("El jugador "+(jugador+1) + " ha perdido tras descartar a la princesa.");
             }
 
             if(cartasMesaJugadores[jugador]==null)    cartasMesaJugadores[jugador]=[carta];
@@ -930,6 +1065,8 @@ function accionPrincipe(carta, a, b, jugador){
         }
     }else{
         console.log("El jugador " + (turnoJugador+1)+" no ha podido hacer descartarse al jugador " + (jugador+1));
+        textoEventosPartida.shift();
+        textoEventosPartida.push("El jugador " + (turnoJugador+1)+" no ha podido hacer descartarse al jugador " + (jugador+1));
     }
     game.time.events.add(2500, finTurno);
 }
