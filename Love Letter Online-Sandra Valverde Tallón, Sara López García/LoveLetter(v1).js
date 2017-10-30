@@ -41,7 +41,12 @@ var game = new Phaser.Game(gameOptions.gameWidth, gameOptions.gameHeight, Phaser
 function preload() {
 
     game.load.image('menu', 'assets/prueba/menu.png');
-    game.load.image('instrucciones', 'assets/prueba/mesa.png');
+    game.load.image('instru1', 'assets/prueba/instru1.png');
+    game.load.image('instru2', 'assets/prueba/instru2.png');
+    game.load.image('instru3', 'assets/prueba/instru3.png');
+    game.load.image('flecha', 'assets/prueba/flecha.png');
+
+
 
     game.load.image('background', 'assets/prueba/mesa.png');
     game.load.image('carta', 'assets/prueba/Carta_atras_ok.png');
@@ -132,10 +137,7 @@ function create(){
     textoInstrucciones.events.onInputOut.add(out, this);
     
     textoJugar.events.onInputUp.add(elegirNumeroJugadores, this);
-    textoInstrucciones.events.onInputUp.add(function(){
-        game.add.image(0,0,'instrucciones');
-
-    })
+    textoInstrucciones.events.onInputUp.add(instrucciones);
 
 }
 
@@ -172,6 +174,35 @@ function elegirNumeroJugadores(item){
     item.kill();
 }
 
+function instrucciones(){
+    var contador = 0;
+    var img = game.add.image(0,0,'instru1');
+    var img2;
+    var btn = game.add.button(gameOptions.gameWidth-240, gameOptions.gameHeight-120, 'flecha', function(){
+        contador++;
+        if(contador===1){
+            img.kill();
+            img = game.add.image(0,0,'instru2');
+            img2 = game.add.image(gameOptions.gameWidth-240, gameOptions.gameHeight-120,'flecha');
+            img2.scale.setTo(0.25);
+        }else if(contador===2){
+            img.kill();
+            img2.kill();
+            img = game.add.image(0,0,'instru3');
+            img2 = game.add.image(gameOptions.gameWidth-240, gameOptions.gameHeight-120,'flecha');
+            img2.scale.setTo(0.25);
+        }else if(contador===3){
+            img.kill();
+            img2.kill();
+            btn.kill();
+            contador=0;
+        }
+        
+    }, this, 1, 0);
+    btn.scale.setTo(0.25,0.25);
+}
+
+
 function createGame() {
     jugar = true;
     game.add.tileSprite(0, 0, gameOptions.gameWidth, gameOptions.gameHeight, 'background');
@@ -197,10 +228,6 @@ function createGame() {
         cartaDescarteJugadores[i].protegido = false;
         cartaDescarteJugadores[i].corazones = 0;
      }
-
-    //  cartaDescarteJugadores[1].corazones = 2;
-    //  cartaDescarteJugadores[0].corazones = 1;
-     
 
      var estiloBoton;
      
