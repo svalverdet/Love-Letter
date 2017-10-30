@@ -1,11 +1,14 @@
 /*
 
-    ENTREGA 10: botones terminados + animaciones + varios.
-    Varios: añadido escudo proteccion, oscurecimiento de la carta del jugador que pierde y solución de pequeños bugs.
-
-    Siguiente: asesino, cuadro de partida y rondas.
 
     ENTREGA 11: cuadro de partida + textos ayuda + Asesino.
+
+    Siguiente: solucionar errores, menu, pantalla final. Poner los corazoncitos en el juego.
+
+    ENTREGA 12: ya se puede jugar varias rondas. Corazones añadidos. Menú.
+
+    Siguiente: instrucciones y solucion de errores
+
     
 
     1. Para pasar a pantalla completa basta con pulsar F11.
@@ -37,16 +40,21 @@ var game = new Phaser.Game(gameOptions.gameWidth, gameOptions.gameHeight, Phaser
 
 function preload() {
 
+    game.load.image('menu', 'assets/prueba/menu.png');
+    game.load.image('instrucciones', 'assets/prueba/mesa.png');
+
     game.load.image('background', 'assets/prueba/mesa.png');
     game.load.image('carta', 'assets/prueba/Carta_atras_ok.png');
     game.load.image('descarte', 'assets/prueba/descarte.png');
     game.load.spritesheet('cartas1', 'assets/prueba/SpriteSheet1.png', gameOptions.cardSheetWidth, gameOptions.cardSheetHeight);
     game.load.spritesheet('cartas2', 'assets/prueba/SpriteSheet2.png', gameOptions.cardSheetWidth, gameOptions.cardSheetHeight);
     game.load.spritesheet('boton', 'assets/prueba/botones.png', 265/2, 52);
+    //Copyright: los sprites de los botones se han obtenido de https://opengameart.org/content/ui-button-and-extra, hechos por StumpyStrust.
     game.load.image('cuadro', 'assets/prueba/ayuda.png');
     game.load.image('cerrar', 'assets/prueba/cerrar.png');
     game.load.image('protegido', 'assets/prueba/prote.png');
     game.load.image('eventos', 'assets/prueba/eventos.png');
+    game.load.image('corazon', 'assets/prueba/corazon.png');
 }
 
 //variables globales
@@ -54,8 +62,10 @@ var mazo; //El mazo en sí
 var cartaMazo; //Representa la imagen del mazo.
 var indiceMazo = 0; //Para ir sacando las cartas del mazo, recorre todas las cartas
 var turnos = 0; //Aumenta cada vez que juega un jugador
-var numeroJugadores = 4; //Número entre 2 y 4.
+var numeroJugadores = 3; //Número entre 2 y 4.
 var turnoJugador; //A qué jugador le toca jugar
+var corazonesParaGanar = 2;
+var ganadorJuego;
 
 var cartasManoJugadores = []; //Las cartas que tienen los jugadores en mano
 var cartasMesaJugadores = []; //Las cartas que han ido descartando los jugadores
@@ -95,14 +105,78 @@ var cuadroPartida;
 var textoPartida;
 var textoEventosPartida = ["NUEVA PARTIDA\nJugador 1, te toca empezar.", "Descarta una de tus cartas.", " "];
 
+var textoJugar;
+var textoInstrucciones;
 
-function create() {
-    
+var jugar = false; 
+
+function create(){
     //Cargar como fondo
     game.stage.backgroundColor = "#c73a3a";
-    game.add.tileSprite(0, 0, gameOptions.gameWidth, gameOptions.gameHeight, 'background');
+    game.add.tileSprite(0, 0, gameOptions.gameWidth, gameOptions.gameHeight, 'menu');
     //Centrar el juego en la pantalla
     this.game.scale.pageAlignHorizontally = true;this.game.scale.pageAlignVertically = true;this.game.scale.refresh();
+
+    textoJugar = game.add.text(gameOptions.gameWidth-220, 100,"Jugar", { font: "bold 72px Waverly", fill:"#000000"});
+    textoInstrucciones = game.add.text(gameOptions.gameWidth-220, 190,"Instrucciones", { font: "bold 36px Waverly", fill:"#000000"});
+    textoJugar.anchor.setTo(0.5, 0.5);
+    textoInstrucciones.anchor.setTo(0.5, 0.5);
+
+
+    textoJugar.inputEnabled = true;
+    textoInstrucciones.inputEnabled = true;
+
+    textoJugar.events.onInputOver.add(over, this);
+    textoInstrucciones.events.onInputOver.add(over, this);
+    textoJugar.events.onInputOut.add(out, this);
+    textoInstrucciones.events.onInputOut.add(out, this);
+    
+    textoJugar.events.onInputUp.add(elegirNumeroJugadores, this);
+    textoInstrucciones.events.onInputUp.add(function(){
+        game.add.image(0,0,'instrucciones');
+
+    })
+
+}
+
+function over(item){
+    item.fill = ("#AAAAAA");
+}
+function out(item){
+    item.fill = ("#000000");
+}
+
+function elegirNumeroJugadores(item){
+    item.inputEnabled = false;
+    var botonesElegirJugadores = [];
+    for(var j=0; j<3; j++){
+        botonesElegirJugadores[j] = game.add.button((item.x-140)+j*140, item.y, 'boton', function(btn){
+            numeroJugadores = botonesElegirJugadores.indexOf(btn)+2;
+            delete botonesElegirJugadores;
+            createGame();
+        }, this, 1, 0);
+        botonesElegirJugadores[j].anchor.setTo(0.5, 0.5);
+        botonesElegirJugadores[j].useHandCursor = true;
+
+        estiloBoton = { font: "bold 25px Waverly", fill:"#AAAAAA", wordWrap: true, wordWrapWidth: botonesElegirJugadores[j].width, align: "center"};
+        var textoBotonMenu = game.add.text(botonesElegirJugadores[j].width/2-65, botonesElegirJugadores[j].height/2-23, (j+2), estiloBoton);
+        textoBotonMenu.anchor.set(0.5);
+        botonesElegirJugadores[j].addChild(textoBotonMenu);       
+       
+
+    }
+    var txt_j = game.add.text(botonesElegirJugadores[1].x, botonesElegirJugadores[1].y+50, "JUGADORES", estiloBoton);
+    txt_j.anchor.set(0.5);
+    
+
+    item.kill();
+}
+
+function createGame() {
+    jugar = true;
+    game.add.tileSprite(0, 0, gameOptions.gameWidth, gameOptions.gameHeight, 'background');
+    //Centrar el juego en la pantalla
+    //this.game.scale.pageAlignHorizontally = true;this.game.scale.pageAlignVertically = true;this.game.scale.refresh();
     
     //Imagen que simula el mazo
     cartaMazo = game.add.image(game.world.centerX, game.world.centerY, 'carta');
@@ -123,6 +197,10 @@ function create() {
         cartaDescarteJugadores[i].protegido = false;
         cartaDescarteJugadores[i].corazones = 0;
      }
+
+    //  cartaDescarteJugadores[1].corazones = 2;
+    //  cartaDescarteJugadores[0].corazones = 1;
+     
 
      var estiloBoton;
      
@@ -173,7 +251,7 @@ function create() {
     cuadroPartida.alpha = 0.8;
     //cuadroPartida.scale.setTo(1.2, 1.2);
 
-    var style2 = { font: "bold 15px Waverly", fill:"#FFFFFF", wordWrap: true, wordWrapWidth: cuadroPartida.width-75, align: "left"};
+    var style2 = { font: "bold 17px Waverly", fill:"#FFFFFF", wordWrap: true, wordWrapWidth: cuadroPartida.width-75, align: "left"};
     textoPartida = game.add.text(cuadroPartida.width/2, cuadroPartida.height/2, textoEventosPartida[0]+"\n"+textoEventosPartida[1]+"\n"+textoEventosPartida[2], style2);
     textoPartida.anchor.set(0.5);
     cuadroPartida.addChild(textoPartida);
@@ -183,23 +261,23 @@ function create() {
 function abrirAyuda(a, b, indice){
     
     if(!(guardiaActivo && turnoJugador===0)){
+        //La ventana se abre sólo si no está abierta o abriéndose
         if ((tweenAyuda !== null && tweenAyuda.isRunning) || popupAyuda.scale.x === 1)
         {
             return;
         }
         textoAyuda.setText(textoAyudaOrden[indice]);
-        //La ventana se abre sólo si ya está abierta o abriéndose
+        
         tweenAyuda = game.add.tween(popupAyuda.scale).to( { x: 0.8, y: 0.8 }, 1000, Phaser.Easing.Elastic.Out, true);
 
     } 
 }
 function cerrarAyuda(){
+    //La ventana se cierra sólo si no se está cerrando/está cerrada
     if (tweenAyuda && tweenAyuda.isRunning || popupAyuda.scale.x === 0.1)
     {
         return;
     }
-
-    //La ventana se cierra sólo si no se está cerrando/está cerrada
     tweenAyuda = game.add.tween(popupAyuda.scale).to( { x: 0.1, y: 0.1 }, 500, Phaser.Easing.Elastic.In, true);
 }
 
@@ -330,17 +408,20 @@ function animacionRepartir(carta, tipo, jugadorReceptor){
 
 
 function update(){ 
-    textoPartida.setText(textoEventosPartida[0]+"\n"+textoEventosPartida[1]+"\n"+textoEventosPartida[2]);
-    //Si es el turno del siguiente jugador, se comprueba qué hacer
-    if(canPlay){
-        canPlay = false;
-        //Se añade un retardo al reparto inicial
-        if(turnos<=numeroJugadores){  
-            game.time.events.add(250, manejadorTurnos);
-        }else{
-            manejadorTurnos();
+    if(jugar){
+        textoPartida.setText(textoEventosPartida[0]+"\n"+textoEventosPartida[1]+"\n"+textoEventosPartida[2]);
+        //Si es el turno del siguiente jugador, se comprueba qué hacer
+        if(canPlay){
+            canPlay = false;
+            //Se añade un retardo al reparto inicial
+            if(turnos<=numeroJugadores){  
+                game.time.events.add(450, manejadorTurnos);
+            }else{
+                manejadorTurnos();
+            }
+            
         }
-        
+
     }
     
 }
@@ -358,6 +439,7 @@ function elegirCarta(carta, a, b, indice, condesa){
     }
     else {
         if(turnoJugador===0) {
+            //Evita que puedas clicar dos veces.
             if(cartasManoJugadores[0][0] != undefined && cartasManoJugadores[0][0].inputEnabled==true)
             cartasManoJugadores[0][0].inputEnabled=false;
             if(cartasManoJugadores[0][1] != undefined && cartasManoJugadores[0][1].inputEnabled==true)
@@ -381,7 +463,6 @@ function animacionDescartar(carta, indice){
     tween.onComplete.add(function() {
         //Se añade la imagen encima
         var im_temp = game.add.image(posMesaJugadores[turnoJugador][0], posMesaJugadores[turnoJugador][1], 'cartas1', carta.tipoframe);
-        //AÑADIR ANIMACION AQUÍ                                                                                                 AQUI ANIMACION
         im_temp.anchor.setTo(0.5, 0.5);
     }); 
 
@@ -553,7 +634,7 @@ function finTurno(){
         //canPlay se pone a true cuando le toca al siguiente jugador y si no se ha acabado el mazo y si queda más de un jugador vivo.   
         turnos++;
         jugadorElegido = false;
-        guardiaActivo = false;
+        //guardiaActivo = false;
         canPlay = true;
     }else{
         //Se determina quién ha ganado
@@ -569,9 +650,11 @@ function finPartida(){
         var cartaMasAlta=0;
         var jGanador;
 
+        //Busca la carta más alta
         for(var i=0; i<numeroJugadores; i++){
             var carta;
             if(cartaDescarteJugadores[i].vivo){
+                //Busca la carta que tiene el jugador "i" para poder comparar su valor
                 if(cartasManoJugadores[i][0]!=undefined){
                     carta = cartasManoJugadores[i][0];
                 }
@@ -580,6 +663,7 @@ function finPartida(){
                 }
             
                 if(carta.valor>cartaMasAlta){
+                    cartaMasAlta = carta.valor;
                     jGanador = i;
                 }
             }
@@ -592,15 +676,21 @@ function finPartida(){
         textoEventosPartida.shift();
         textoEventosPartida.push("...el jugador "+(jGanador+1)+" !");
 
+        game.time.events.add(1000, function(){
+            echarCartaDerrotados(carta, jGanador);
+        });
     }
     else{
         var jVivo;
         var carta;
+        //Se busca quien es el jugador vivo
         for(var i=0; i<numeroJugadores; i++){
             if(cartaDescarteJugadores[i].vivo){
                 jVivo=i;
             }
         }
+
+        //Se busca su carta
         if(cartasManoJugadores[jVivo][0]!=undefined){
             carta = cartasManoJugadores[jVivo][0];
         }
@@ -614,9 +704,49 @@ function finPartida(){
 
         textoEventosPartida.shift();
         textoEventosPartida.push("...el jugador "+(jVivo+1)+" !");
+        
+        game.time.events.add(1000, function(){
+            echarCartaDerrotados(carta, jVivo);
+        });
     }
+
+
+    if(finJuego()){
+        canPlay = false;
+        textoEventosPartida.shift();
+        textoEventosPartida.push("Parece que alguien ha conseguido todos los corazones.");
+        textoEventosPartida.shift();
+        textoEventosPartida.push("¡El ganador del juego es el jugador "+(ganadorJuego+1)+"!");
+    }
+    
 }
 
+function finJuego(){
+    //Si algún jugador ha conseguido todos los corazones, es el ganador definitivo
+    for(var idx=0; idx<numeroJugadores; idx++){
+        if(cartaDescarteJugadores[idx].corazones>corazonesParaGanar){
+            ganadorJuego = idx;
+            return true;
+        }
+    }
+    textoEventosPartida.shift();
+    textoEventosPartida.push("Se pasará a la siguiente ronda en 5 segundos.");
+
+    //Se pintan los corazones de cada jugador
+    for(var i=0; i<numeroJugadores; i++) {
+        for(var j=0; j<cartaDescarteJugadores[i].corazones;j++){
+            if(i===0){
+                var cor = game.add.image(posMesaJugadores[i][0]-50+40*j,posMesaJugadores[i][1]-gameOptions.cardSheetHeight/2-15, 'corazon');
+            }else{
+                var cor = game.add.image(posMesaJugadores[i][0]-50+40*j,posMesaJugadores[i][1]+gameOptions.cardSheetHeight/2+15, 'corazon');
+            }
+            cor.anchor.setTo(0.5,0.5);
+            cor.scale.setTo(0.8,0.8);
+        }
+    }
+
+    game.time.events.add(5000, resetear);
+}
 
 function manejadorTurnos(){
     //Con el resto se calcula hacia quién va la carta.
@@ -631,7 +761,7 @@ function manejadorTurnos(){
                 cartasManoJugadores[0][0].inputEnabled=true;
             }
         }else {
-           
+            //Si la posicion x está vacía, rellenala al robar carta
             if(cartasManoJugadores[turnoJugador][0]==undefined){
                 cartasManoJugadores[turnoJugador][0] = sacarCartaMazo(turnoJugador);
             }else{
@@ -657,7 +787,7 @@ function manejadorTurnos(){
             for(var i=0; i<numeroJugadores; i++){
                 if(cartaDescarteJugadores[i].protegido && i==turnoJugador){
                     cartaDescarteJugadores[i].protegido = false;
-                    cartaDescarteJugadores[i].inputEnabled = true;
+                    //cartaDescarteJugadores[i].inputEnabled = true;
                     console.log("El jugador "+(turnoJugador+1) +" ya no está protegido.");
                     textoEventosPartida.shift();
                     textoEventosPartida.push("El jugador "+(turnoJugador+1) +" ya no está protegido.");
@@ -727,6 +857,7 @@ function eleccionGuardia(carta, a, b, jugador){
 function accionGuardia(carta, a, b, jugador, btn){
     if(guardiaActivo){
         jugadorElegido = true;
+        
         cartaDescarteJugadores[jugador].events.destroy();
         //No puede acusarse a sí mismo
         //if(cartaDescarteJugadores[jugador].vivo && !cartaDescarteJugadores[jugador].protegido){
@@ -783,7 +914,11 @@ function accionGuardia(carta, a, b, jugador, btn){
             textoEventosPartida.push("El jugador " + (turnoJugador+1)+" no ha podido acusar al jugador " + (jugador+1));
         }
         
-        game.time.events.add(3250, finTurno);
+        game.time.events.add(100, function(){
+            guardiaActivo = false;
+        });
+
+        game.time.events.add(2750, finTurno);
     }
 }
 
@@ -1003,70 +1138,113 @@ function accionPrincipe(carta, a, b, jugador){
     cartaDescarteJugadores[jugador].events.destroy();
 
     if(cartaDescarteJugadores[jugador].vivo && !cartaDescarteJugadores[jugador].protegido){
-        var carta; //La carta de la que se tiene que descartar
+        var carta_bis; //La carta de la que se tiene que descartar
         var indice;
         
         if(cartasManoJugadores[jugador][0]==undefined){
-            cartasManoJugadores[jugador][0]=sacarCartaMazo(jugador);
-            carta = cartasManoJugadores[jugador][1];
+            carta_bis = cartasManoJugadores[jugador][1];
             indice = 1;
+            if(carta_bis.personaje!=="Princesa"){cartasManoJugadores[jugador][0]=sacarCartaMazo(jugador);}
         }
         else{
-            cartasManoJugadores[jugador][1]=sacarCartaMazo(jugador);
-            carta = cartasManoJugadores[jugador][0];
+            carta_bis = cartasManoJugadores[jugador][0];
             indice = 0;
+            if(carta_bis.personaje!=="Princesa"){cartasManoJugadores[jugador][1]=sacarCartaMazo(jugador);}
         }
 
-        game.time.events.add(150, principeDescartar);
+        game.time.events.add(150, principeDescartar, this, carta_bis, jugador, indice);
 
-        function principeDescartar(){
-            var tween;
-            
-            tween = game.add.tween(carta).to({
-                x: posMesaJugadores[jugador][0], 
-                y: posMesaJugadores[jugador][1]
-            },1000,Phaser.Easing.Cubic.Out, true);
-            //Al terminar la animación, se cambia la imagen de descarte de jugadores.
-            tween.onComplete.add(function() {
-                //Se añade la imagen encima
-                if(carta.personaje==="Princesa"){
-                    var im_temp = game.add.image(posMesaJugadores[jugador][0], posMesaJugadores[jugador][1], 'cartas2', carta.tipoframe);
-                    var capaOscura = game.add.graphics(0,0);
-                    capaOscura.beginFill("#000000", 0.6);
-                    capaOscura.drawRect(posMesaJugadores[jugador][0]-gameOptions.cardSheetWidth/2, posMesaJugadores[jugador][1]-gameOptions.cardSheetHeight/2, gameOptions.cardSheetWidth, gameOptions.cardSheetHeight);
-                    capaOscura.endFill();
-                }
-                else
-                    var im_temp = game.add.image(posMesaJugadores[jugador][0], posMesaJugadores[jugador][1], 'cartas1', carta.tipoframe);
-                im_temp.anchor.setTo(0.5, 0.5);
-            }); 
-           
-
-            console.log("El jugador " + (turnoJugador+1)+" ha hecho descartarse al jugador " + (jugador+1));
-            textoEventosPartida.shift();
-            textoEventosPartida.push("El jugador " + (turnoJugador+1)+" ha hecho descartarse al jugador " + (jugador+1));
-
-            if(carta.personaje==="Princesa"){
-                cartaDescarteJugadores[jugador].vivo = false;
-                jugadoresVivos--;
-                console.log("El jugador "+(jugador+1) + " ha perdido tras descartar a la princesa.");
-                textoEventosPartida.shift();
-                textoEventosPartida.push("El jugador "+(jugador+1) + " ha perdido tras descartar a la princesa.");
-            }
-
-            if(cartasMesaJugadores[jugador]==null)    cartasMesaJugadores[jugador]=[carta];
-            else    cartasMesaJugadores[jugador].push(carta);
-
-            //No ha habido otro modo de eliminar la carta
-            if(indice===0) delete cartasManoJugadores[jugador][0];
-            else delete cartasManoJugadores[jugador][1];
-
-            indiceMazo++;
-        }
+        
     }else{
         console.log("El jugador " + (turnoJugador+1)+" no ha podido hacer descartarse al jugador " + (jugador+1));
         textoEventosPartida.shift();
         textoEventosPartida.push("El jugador " + (turnoJugador+1)+" no ha podido hacer descartarse al jugador " + (jugador+1));
     }
     game.time.events.add(2500, finTurno);
+}
+
+function principeDescartar(carta_bis, jugador, indice){
+    var tween;
+    
+    tween = game.add.tween(carta_bis).to({
+        x: posMesaJugadores[jugador][0], 
+        y: posMesaJugadores[jugador][1]
+    },1000,Phaser.Easing.Cubic.Out, true);
+    //Al terminar la animación, se cambia la imagen de descarte de jugadores.
+    tween.onComplete.add(function() {
+        //Se añade la imagen encima
+        if(carta_bis.personaje==="Princesa"){
+            var im_temp = game.add.image(posMesaJugadores[jugador][0], posMesaJugadores[jugador][1], 'cartas2', carta_bis.tipoframe);
+            var capaOscura = game.add.graphics(0,0);
+            capaOscura.beginFill("#000000", 0.6);
+            capaOscura.drawRect(posMesaJugadores[jugador][0]-gameOptions.cardSheetWidth/2, posMesaJugadores[jugador][1]-gameOptions.cardSheetHeight/2, gameOptions.cardSheetWidth, gameOptions.cardSheetHeight);
+            capaOscura.endFill();
+        }
+        else
+            var im_temp = game.add.image(posMesaJugadores[jugador][0], posMesaJugadores[jugador][1], 'cartas1', carta_bis.tipoframe);
+        im_temp.anchor.setTo(0.5, 0.5);
+    }); 
+   
+
+    console.log("El jugador " + (turnoJugador+1)+" ha hecho descartarse al jugador " + (jugador+1));
+    textoEventosPartida.shift();
+    textoEventosPartida.push("El jugador " + (turnoJugador+1)+" ha hecho descartarse al jugador " + (jugador+1));
+
+    if(carta_bis.personaje==="Princesa"){
+        cartaDescarteJugadores[jugador].vivo = false;
+        jugadoresVivos--;
+        console.log("El jugador "+(jugador+1) + " ha perdido tras descartar a la princesa.");
+        textoEventosPartida.shift();
+        textoEventosPartida.push("El jugador "+(jugador+1) + " ha perdido tras descartar a la princesa.");
+    }
+
+    if(cartasMesaJugadores[jugador]==null)    cartasMesaJugadores[jugador]=[carta_bis];
+    else    cartasMesaJugadores[jugador].push(carta_bis);
+
+    //No ha habido otro modo de eliminar la carta
+    if(indice===0){
+        cartasManoJugadores[jugador][0] = undefined;
+    }
+    else {
+        cartasManoJugadores[jugador][1] = undefined;
+    }
+
+    indiceMazo++;
+}
+
+
+function resetear(){
+    //variables globales
+    indiceMazo = 0; //Para ir sacando las cartas del mazo, recorre todas las cartas
+    turnos = 0; //Aumenta cada vez que juega un jugador
+
+    delete cartasManoJugadores; //Las cartas que tienen los jugadores en mano
+    delete cartasMesaJugadores; //Las cartas que han ido descartando los jugadores
+    //delete cartaDescarteJugadores; //Objeto para interactuar con los demás jugadores y mostrar la última carta descartada
+
+    jugadorElegido = false; //Para los efectos de las cartas
+    canPlay = true; //Determina si es el turno del siguiente jugador
+    finReparto = false; //Utilizada para hacer el reparto inicial automático.
+
+    jugadoresVivos = numeroJugadores;
+    guardiaActivo = false;
+
+    textoEventosPartida = ["NUEVA PARTIDA\nJugador 1, te toca empezar.", "Descarta una de tus cartas.", " "];
+
+    cartaMazo = game.add.image(game.world.centerX, game.world.centerY, 'carta');
+    cartaMazo.anchor.setTo(0.5, 0.5);
+    cartaMazo.angle=90;
+
+    //Creación del mazo 
+    Phaser.ArrayUtils.shuffle(mazo);
+
+    //Creación de los objetos mesa. Para elegir a los demás jugadores y donde se posicionan sus cartas descartadas
+    //De hecho, representa al jugador
+    for(var i=0; i<numeroJugadores; i++){
+        cartaDescarteJugadores[i].inputEnabled=true;
+        cartaDescarteJugadores[i].vivo = true;
+        cartaDescarteJugadores[i].protegido = false;
+     }
+
+     
 }
