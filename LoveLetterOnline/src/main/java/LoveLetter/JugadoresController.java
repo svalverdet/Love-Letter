@@ -1,8 +1,8 @@
 package LoveLetter;
 
-import java.util.ArrayList;
+//import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+//import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+//import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,7 +29,7 @@ public class JugadoresController {
 	private AtomicLong lastId = new AtomicLong();
 
 	@GetMapping("/")//Te da todos los jugadores con sus atributos
-	public Collection<Jugador> anuncios() {
+	public Collection<Jugador> jugadores() {
 		return jugadores.values();//te devuelve los valores de cada jugador
 	}
 
@@ -65,7 +65,7 @@ public class JugadoresController {
 
 		Jugador jugador = jugadores.get(id);//encuentra al jugador
 
-		if (jugador != null) {//sie existe
+		if (jugador != null) {//si existe
 			return new ResponseEntity<>(jugador, HttpStatus.OK);//devuelve sus datos
 		} else {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);

@@ -1,10 +1,21 @@
 package LoveLetter;
 
+import java.util.List;
+
 public class Partida {
 	private long id = -1;
 	private String nomPartida;
 	private int numJug;
 	private int numJugMax;
+	private List<Jugador> jugPartida;//HAY QUE ACABARLO
+	
+	public List<Jugador> getJugPartida() {
+		return jugPartida;
+	}
+
+	public void setJugPartida(List<Jugador> jugPartida) {
+		this.jugPartida = jugPartida;
+	}
 	
 	public String getnomPartida() {
 		return nomPartida;
