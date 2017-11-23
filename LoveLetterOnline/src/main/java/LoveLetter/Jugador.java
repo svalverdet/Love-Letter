@@ -1,6 +1,7 @@
 package LoveLetter;
 
 public class Jugador {
+	private long id = -1;
 	private String nombre;
 	private int partidasGanadas;
 	
@@ -21,4 +22,17 @@ public class Jugador {
 	public void setPartidasGanadas(int partidasGanadas) {
 		this.partidasGanadas = partidasGanadas;
 	}
+	
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+	@Override
+	public String toString() {
+		return "Jugador [id=" + id + ",nombre=" + nombre + ", partidas ganadas=" + partidasGanadas +"]";
+	}
+
 }
