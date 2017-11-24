@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 //import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,16 +24,27 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/partidas")
 public class PartidasController {
+	
+	//@Autowired
+	//private PartidasService partidasService;
+	
 	private Map<Long, Partida> partidas = new ConcurrentHashMap<>();
+	//private Map<Long, Partida> partidas = new HashMap<Long, Partida>
 	private AtomicLong lastId = new AtomicLong();
 	
-	@GetMapping("/")//Te da todas las partidas con sus atributos
+	
+	
+	
+	
+	//@GetMapping("/")//Te da todas las partidas con sus atributos
+	@RequestMapping(method = RequestMethod.GET)
 	public Collection<Partida> partidas() {
 		return partidas.values();//te devuelve los valores de cada partida
 	}
 	
 
-	@PostMapping("/")//le das un body para meter una partida en la lista
+	//@PostMapping("/")//le das un body para meter una partida en la lista
+	@RequestMapping(method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public Partida nuevaPartida(@RequestBody Partida partida) {
 
@@ -59,7 +71,8 @@ public class PartidasController {
 		}
 	}
 	
-	@GetMapping("/{id}")//te devuelve los datos de la partida con la id dada después de "/"
+	//@GetMapping("/{id}")//te devuelve los datos de la partida con la id dada después de "/"
+	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	public ResponseEntity<Partida> getPartida(@PathVariable long id) {
 
 		Partida partida = partidas.get(id);//encuentra a la partida
@@ -71,7 +84,8 @@ public class PartidasController {
 		}
 	}
 	
-	@DeleteMapping("/{id}")//elimina la partida con id dada
+	//@DeleteMapping("/{id}")//elimina la partida con id dada
+	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 	public ResponseEntity<Partida> borraPartida(@PathVariable long id) {
 
 		Partida partida = partidas.remove(id);

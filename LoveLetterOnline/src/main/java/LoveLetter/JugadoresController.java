@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 //import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,14 +27,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class JugadoresController {
 
 	private Map<Long, Jugador> jugadores = new ConcurrentHashMap<>();
+	//private Map<Long, Jugador> jugadores = new HashMap<Long, Jugador>
 	private AtomicLong lastId = new AtomicLong();
 
-	@GetMapping("/")//Te da todos los jugadores con sus atributos
+	
+	
+	//@GetMapping("/")//Te da todos los jugadores con sus atributos
+	@RequestMapping(method = RequestMethod.GET)
 	public Collection<Jugador> jugadores() {
 		return jugadores.values();//te devuelve los valores de cada jugador
 	}
 
-	@PostMapping("/")//le das un body para meter un jugador en la lista
+	//@PostMapping("/")//le das un body para meter un jugador en la lista
+	@RequestMapping(method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public Jugador nuevoJugador(@RequestBody Jugador jugador) {
 
@@ -60,7 +66,9 @@ public class JugadoresController {
 		}
 	}
 
-	@GetMapping("/{id}")//te devuelve los datos del jugador con la id dada después de "/"
+	
+	//@GetMapping("/{id}")//te devuelve los datos del jugador con la id dada después de "/"
+	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	public ResponseEntity<Jugador> getJugador(@PathVariable long id) {
 
 		Jugador jugador = jugadores.get(id);//encuentra al jugador
@@ -72,7 +80,8 @@ public class JugadoresController {
 		}
 	}
 
-	@DeleteMapping("/{id}")//elimina al jugador con id dada
+	//@DeleteMapping("/{id}")//elimina al jugador con id dada
+	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 	public ResponseEntity<Jugador> borraJugador(@PathVariable long id) {
 
 		Jugador jugador = jugadores.remove(id);

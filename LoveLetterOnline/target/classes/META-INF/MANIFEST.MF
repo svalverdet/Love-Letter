@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Implementation-Title: LoveLetterOnline
 Implementation-Version: 0.0.1-SNAPSHOT
-Built-By: Sara
+Built-By: Sandra
 Implementation-Vendor-Id: LoveLetter
-Build-Jdk: 1.8.0_77
+Build-Jdk: 1.8.0_91
 Implementation-URL: http://projects.spring.io/spring-boot/LoveLetterOn
  line/
 Created-By: Maven Integration for Eclipse
