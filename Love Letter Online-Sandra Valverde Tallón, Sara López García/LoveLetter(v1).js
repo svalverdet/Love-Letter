@@ -1,6 +1,5 @@
 /*
 
-<<<<<<< HEAD
 
     ENTREGA 11: cuadro de partida + textos ayuda + Asesino.
 
@@ -10,14 +9,6 @@
 
     Siguiente: instrucciones y solucion de errores
 
-=======
-    ENTREGA 10: botones terminados + animaciones + varios.
-    Varios: añadido escudo proteccion, oscurecimiento de la carta del jugador que pierde y solución de pequeños bugs.
-
-    Siguiente: asesino, cuadro de partida y rondas.
-
-    ENTREGA 11: cuadro de partida + textos ayuda + Asesino.
->>>>>>> Cambios-Código
     
 
     1. Para pasar a pantalla completa basta con pulsar F11.
@@ -49,7 +40,6 @@ var game = new Phaser.Game(gameOptions.gameWidth, gameOptions.gameHeight, Phaser
 
 function preload() {
 
-<<<<<<< HEAD
     game.load.image('menu', 'assets/prueba/menu.png');
     game.load.image('instru1', 'assets/prueba/instru1.png');
     game.load.image('instru2', 'assets/prueba/instru2.png');
@@ -58,26 +48,18 @@ function preload() {
 
 
 
-=======
->>>>>>> Cambios-Código
     game.load.image('background', 'assets/prueba/mesa.png');
     game.load.image('carta', 'assets/prueba/Carta_atras_ok.png');
     game.load.image('descarte', 'assets/prueba/descarte.png');
     game.load.spritesheet('cartas1', 'assets/prueba/SpriteSheet1.png', gameOptions.cardSheetWidth, gameOptions.cardSheetHeight);
     game.load.spritesheet('cartas2', 'assets/prueba/SpriteSheet2.png', gameOptions.cardSheetWidth, gameOptions.cardSheetHeight);
     game.load.spritesheet('boton', 'assets/prueba/botones.png', 265/2, 52);
-<<<<<<< HEAD
     //Copyright: los sprites de los botones se han obtenido de https://opengameart.org/content/ui-button-and-extra, hechos por StumpyStrust.
-=======
->>>>>>> Cambios-Código
     game.load.image('cuadro', 'assets/prueba/ayuda.png');
     game.load.image('cerrar', 'assets/prueba/cerrar.png');
     game.load.image('protegido', 'assets/prueba/prote.png');
     game.load.image('eventos', 'assets/prueba/eventos.png');
-<<<<<<< HEAD
     game.load.image('corazon', 'assets/prueba/corazon.png');
-=======
->>>>>>> Cambios-Código
 }
 
 //variables globales
@@ -85,15 +67,10 @@ var mazo; //El mazo en sí
 var cartaMazo; //Representa la imagen del mazo.
 var indiceMazo = 0; //Para ir sacando las cartas del mazo, recorre todas las cartas
 var turnos = 0; //Aumenta cada vez que juega un jugador
-<<<<<<< HEAD
 var numeroJugadores = 3; //Número entre 2 y 4.
 var turnoJugador; //A qué jugador le toca jugar
 var corazonesParaGanar = 2;
 var ganadorJuego;
-=======
-var numeroJugadores = 4; //Número entre 2 y 4.
-var turnoJugador; //A qué jugador le toca jugar
->>>>>>> Cambios-Código
 
 var cartasManoJugadores = []; //Las cartas que tienen los jugadores en mano
 var cartasMesaJugadores = []; //Las cartas que han ido descartando los jugadores
@@ -133,7 +110,6 @@ var cuadroPartida;
 var textoPartida;
 var textoEventosPartida = ["NUEVA PARTIDA\nJugador 1, te toca empezar.", "Descarta una de tus cartas.", " "];
 
-<<<<<<< HEAD
 var textoJugar;
 var textoInstrucciones;
 
@@ -232,16 +208,6 @@ function createGame() {
     game.add.tileSprite(0, 0, gameOptions.gameWidth, gameOptions.gameHeight, 'background');
     //Centrar el juego en la pantalla
     //this.game.scale.pageAlignHorizontally = true;this.game.scale.pageAlignVertically = true;this.game.scale.refresh();
-=======
-
-function create() {
-    
-    //Cargar como fondo
-    game.stage.backgroundColor = "#c73a3a";
-    game.add.tileSprite(0, 0, gameOptions.gameWidth, gameOptions.gameHeight, 'background');
-    //Centrar el juego en la pantalla
-    this.game.scale.pageAlignHorizontally = true;this.game.scale.pageAlignVertically = true;this.game.scale.refresh();
->>>>>>> Cambios-Código
     
     //Imagen que simula el mazo
     cartaMazo = game.add.image(game.world.centerX, game.world.centerY, 'carta');
@@ -312,11 +278,7 @@ function create() {
     cuadroPartida.alpha = 0.8;
     //cuadroPartida.scale.setTo(1.2, 1.2);
 
-<<<<<<< HEAD
     var style2 = { font: "bold 17px Waverly", fill:"#FFFFFF", wordWrap: true, wordWrapWidth: cuadroPartida.width-75, align: "left"};
-=======
-    var style2 = { font: "bold 15px Waverly", fill:"#FFFFFF", wordWrap: true, wordWrapWidth: cuadroPartida.width-75, align: "left"};
->>>>>>> Cambios-Código
     textoPartida = game.add.text(cuadroPartida.width/2, cuadroPartida.height/2, textoEventosPartida[0]+"\n"+textoEventosPartida[1]+"\n"+textoEventosPartida[2], style2);
     textoPartida.anchor.set(0.5);
     cuadroPartida.addChild(textoPartida);
@@ -326,38 +288,23 @@ function create() {
 function abrirAyuda(a, b, indice){
     
     if(!(guardiaActivo && turnoJugador===0)){
-<<<<<<< HEAD
         //La ventana se abre sólo si no está abierta o abriéndose
-=======
->>>>>>> Cambios-Código
         if ((tweenAyuda !== null && tweenAyuda.isRunning) || popupAyuda.scale.x === 1)
         {
             return;
         }
         textoAyuda.setText(textoAyudaOrden[indice]);
-<<<<<<< HEAD
         
-=======
-        //La ventana se abre sólo si ya está abierta o abriéndose
->>>>>>> Cambios-Código
         tweenAyuda = game.add.tween(popupAyuda.scale).to( { x: 0.8, y: 0.8 }, 1000, Phaser.Easing.Elastic.Out, true);
 
     } 
 }
 function cerrarAyuda(){
-<<<<<<< HEAD
     //La ventana se cierra sólo si no se está cerrando/está cerrada
-=======
->>>>>>> Cambios-Código
     if (tweenAyuda && tweenAyuda.isRunning || popupAyuda.scale.x === 0.1)
     {
         return;
     }
-<<<<<<< HEAD
-=======
-
-    //La ventana se cierra sólo si no se está cerrando/está cerrada
->>>>>>> Cambios-Código
     tweenAyuda = game.add.tween(popupAyuda.scale).to( { x: 0.1, y: 0.1 }, 500, Phaser.Easing.Elastic.In, true);
 }
 
@@ -488,7 +435,6 @@ function animacionRepartir(carta, tipo, jugadorReceptor){
 
 
 function update(){ 
-<<<<<<< HEAD
     if(jugar){
         textoPartida.setText(textoEventosPartida[0]+"\n"+textoEventosPartida[1]+"\n"+textoEventosPartida[2]);
         //Si es el turno del siguiente jugador, se comprueba qué hacer
@@ -503,19 +449,6 @@ function update(){
             
         }
 
-=======
-    textoPartida.setText(textoEventosPartida[0]+"\n"+textoEventosPartida[1]+"\n"+textoEventosPartida[2]);
-    //Si es el turno del siguiente jugador, se comprueba qué hacer
-    if(canPlay){
-        canPlay = false;
-        //Se añade un retardo al reparto inicial
-        if(turnos<=numeroJugadores){  
-            game.time.events.add(250, manejadorTurnos);
-        }else{
-            manejadorTurnos();
-        }
-        
->>>>>>> Cambios-Código
     }
     
 }
@@ -533,10 +466,7 @@ function elegirCarta(carta, a, b, indice, condesa){
     }
     else {
         if(turnoJugador===0) {
-<<<<<<< HEAD
             //Evita que puedas clicar dos veces.
-=======
->>>>>>> Cambios-Código
             if(cartasManoJugadores[0][0] != undefined && cartasManoJugadores[0][0].inputEnabled==true)
             cartasManoJugadores[0][0].inputEnabled=false;
             if(cartasManoJugadores[0][1] != undefined && cartasManoJugadores[0][1].inputEnabled==true)
@@ -560,10 +490,6 @@ function animacionDescartar(carta, indice){
     tween.onComplete.add(function() {
         //Se añade la imagen encima
         var im_temp = game.add.image(posMesaJugadores[turnoJugador][0], posMesaJugadores[turnoJugador][1], 'cartas1', carta.tipoframe);
-<<<<<<< HEAD
-=======
-        //AÑADIR ANIMACION AQUÍ                                                                                                 AQUI ANIMACION
->>>>>>> Cambios-Código
         im_temp.anchor.setTo(0.5, 0.5);
     }); 
 
@@ -735,11 +661,7 @@ function finTurno(){
         //canPlay se pone a true cuando le toca al siguiente jugador y si no se ha acabado el mazo y si queda más de un jugador vivo.   
         turnos++;
         jugadorElegido = false;
-<<<<<<< HEAD
         //guardiaActivo = false;
-=======
-        guardiaActivo = false;
->>>>>>> Cambios-Código
         canPlay = true;
     }else{
         //Se determina quién ha ganado
@@ -755,17 +677,11 @@ function finPartida(){
         var cartaMasAlta=0;
         var jGanador;
 
-<<<<<<< HEAD
         //Busca la carta más alta
         for(var i=0; i<numeroJugadores; i++){
             var carta;
             if(cartaDescarteJugadores[i].vivo){
                 //Busca la carta que tiene el jugador "i" para poder comparar su valor
-=======
-        for(var i=0; i<numeroJugadores; i++){
-            var carta;
-            if(cartaDescarteJugadores[i].vivo){
->>>>>>> Cambios-Código
                 if(cartasManoJugadores[i][0]!=undefined){
                     carta = cartasManoJugadores[i][0];
                 }
@@ -774,10 +690,7 @@ function finPartida(){
                 }
             
                 if(carta.valor>cartaMasAlta){
-<<<<<<< HEAD
                     cartaMasAlta = carta.valor;
-=======
->>>>>>> Cambios-Código
                     jGanador = i;
                 }
             }
@@ -790,30 +703,21 @@ function finPartida(){
         textoEventosPartida.shift();
         textoEventosPartida.push("...el jugador "+(jGanador+1)+" !");
 
-<<<<<<< HEAD
         game.time.events.add(1000, function(){
             echarCartaDerrotados(carta, jGanador);
         });
-=======
->>>>>>> Cambios-Código
     }
     else{
         var jVivo;
         var carta;
-<<<<<<< HEAD
         //Se busca quien es el jugador vivo
-=======
->>>>>>> Cambios-Código
         for(var i=0; i<numeroJugadores; i++){
             if(cartaDescarteJugadores[i].vivo){
                 jVivo=i;
             }
         }
-<<<<<<< HEAD
 
         //Se busca su carta
-=======
->>>>>>> Cambios-Código
         if(cartasManoJugadores[jVivo][0]!=undefined){
             carta = cartasManoJugadores[jVivo][0];
         }
@@ -827,7 +731,6 @@ function finPartida(){
 
         textoEventosPartida.shift();
         textoEventosPartida.push("...el jugador "+(jVivo+1)+" !");
-<<<<<<< HEAD
         
         game.time.events.add(1000, function(){
             echarCartaDerrotados(carta, jVivo);
@@ -871,11 +774,6 @@ function finJuego(){
 
     game.time.events.add(5000, resetear);
 }
-=======
-    }
-}
-
->>>>>>> Cambios-Código
 
 function manejadorTurnos(){
     //Con el resto se calcula hacia quién va la carta.
@@ -890,11 +788,7 @@ function manejadorTurnos(){
                 cartasManoJugadores[0][0].inputEnabled=true;
             }
         }else {
-<<<<<<< HEAD
             //Si la posicion x está vacía, rellenala al robar carta
-=======
-           
->>>>>>> Cambios-Código
             if(cartasManoJugadores[turnoJugador][0]==undefined){
                 cartasManoJugadores[turnoJugador][0] = sacarCartaMazo(turnoJugador);
             }else{
@@ -920,11 +814,7 @@ function manejadorTurnos(){
             for(var i=0; i<numeroJugadores; i++){
                 if(cartaDescarteJugadores[i].protegido && i==turnoJugador){
                     cartaDescarteJugadores[i].protegido = false;
-<<<<<<< HEAD
                     //cartaDescarteJugadores[i].inputEnabled = true;
-=======
-                    cartaDescarteJugadores[i].inputEnabled = true;
->>>>>>> Cambios-Código
                     console.log("El jugador "+(turnoJugador+1) +" ya no está protegido.");
                     textoEventosPartida.shift();
                     textoEventosPartida.push("El jugador "+(turnoJugador+1) +" ya no está protegido.");
@@ -994,10 +884,7 @@ function eleccionGuardia(carta, a, b, jugador){
 function accionGuardia(carta, a, b, jugador, btn){
     if(guardiaActivo){
         jugadorElegido = true;
-<<<<<<< HEAD
         
-=======
->>>>>>> Cambios-Código
         cartaDescarteJugadores[jugador].events.destroy();
         //No puede acusarse a sí mismo
         //if(cartaDescarteJugadores[jugador].vivo && !cartaDescarteJugadores[jugador].protegido){
@@ -1054,15 +941,11 @@ function accionGuardia(carta, a, b, jugador, btn){
             textoEventosPartida.push("El jugador " + (turnoJugador+1)+" no ha podido acusar al jugador " + (jugador+1));
         }
         
-<<<<<<< HEAD
         game.time.events.add(100, function(){
             guardiaActivo = false;
         });
 
         game.time.events.add(2750, finTurno);
-=======
-        game.time.events.add(3250, finTurno);
->>>>>>> Cambios-Código
     }
 }
 
@@ -1282,7 +1165,6 @@ function accionPrincipe(carta, a, b, jugador){
     cartaDescarteJugadores[jugador].events.destroy();
 
     if(cartaDescarteJugadores[jugador].vivo && !cartaDescarteJugadores[jugador].protegido){
-<<<<<<< HEAD
         var carta_bis; //La carta de la que se tiene que descartar
         var indice;
         
@@ -1392,72 +1274,4 @@ function resetear(){
      }
 
      
-=======
-        var carta; //La carta de la que se tiene que descartar
-        var indice;
-        
-        if(cartasManoJugadores[jugador][0]==undefined){
-            cartasManoJugadores[jugador][0]=sacarCartaMazo(jugador);
-            carta = cartasManoJugadores[jugador][1];
-            indice = 1;
-        }
-        else{
-            cartasManoJugadores[jugador][1]=sacarCartaMazo(jugador);
-            carta = cartasManoJugadores[jugador][0];
-            indice = 0;
-        }
-
-        game.time.events.add(150, principeDescartar);
-
-        function principeDescartar(){
-            var tween;
-            
-            tween = game.add.tween(carta).to({
-                x: posMesaJugadores[jugador][0], 
-                y: posMesaJugadores[jugador][1]
-            },1000,Phaser.Easing.Cubic.Out, true);
-            //Al terminar la animación, se cambia la imagen de descarte de jugadores.
-            tween.onComplete.add(function() {
-                //Se añade la imagen encima
-                if(carta.personaje==="Princesa"){
-                    var im_temp = game.add.image(posMesaJugadores[jugador][0], posMesaJugadores[jugador][1], 'cartas2', carta.tipoframe);
-                    var capaOscura = game.add.graphics(0,0);
-                    capaOscura.beginFill("#000000", 0.6);
-                    capaOscura.drawRect(posMesaJugadores[jugador][0]-gameOptions.cardSheetWidth/2, posMesaJugadores[jugador][1]-gameOptions.cardSheetHeight/2, gameOptions.cardSheetWidth, gameOptions.cardSheetHeight);
-                    capaOscura.endFill();
-                }
-                else
-                    var im_temp = game.add.image(posMesaJugadores[jugador][0], posMesaJugadores[jugador][1], 'cartas1', carta.tipoframe);
-                im_temp.anchor.setTo(0.5, 0.5);
-            }); 
-           
-
-            console.log("El jugador " + (turnoJugador+1)+" ha hecho descartarse al jugador " + (jugador+1));
-            textoEventosPartida.shift();
-            textoEventosPartida.push("El jugador " + (turnoJugador+1)+" ha hecho descartarse al jugador " + (jugador+1));
-
-            if(carta.personaje==="Princesa"){
-                cartaDescarteJugadores[jugador].vivo = false;
-                jugadoresVivos--;
-                console.log("El jugador "+(jugador+1) + " ha perdido tras descartar a la princesa.");
-                textoEventosPartida.shift();
-                textoEventosPartida.push("El jugador "+(jugador+1) + " ha perdido tras descartar a la princesa.");
-            }
-
-            if(cartasMesaJugadores[jugador]==null)    cartasMesaJugadores[jugador]=[carta];
-            else    cartasMesaJugadores[jugador].push(carta);
-
-            //No ha habido otro modo de eliminar la carta
-            if(indice===0) delete cartasManoJugadores[jugador][0];
-            else delete cartasManoJugadores[jugador][1];
-
-            indiceMazo++;
-        }
-    }else{
-        console.log("El jugador " + (turnoJugador+1)+" no ha podido hacer descartarse al jugador " + (jugador+1));
-        textoEventosPartida.shift();
-        textoEventosPartida.push("El jugador " + (turnoJugador+1)+" no ha podido hacer descartarse al jugador " + (jugador+1));
-    }
-    game.time.events.add(2500, finTurno);
->>>>>>> Cambios-Código
 }
