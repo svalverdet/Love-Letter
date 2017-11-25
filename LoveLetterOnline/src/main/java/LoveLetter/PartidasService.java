@@ -17,7 +17,8 @@ public class PartidasService {
 	
 	
 	public PartidasService() {
-		//Crear partidas dummies.
+		//Crear partida dummy.
+		//createDummyGame();
 	}
 	
 	
@@ -46,6 +47,19 @@ public class PartidasService {
 		return partidas.remove(id);
 	}
 	
-	
-	
+	public void createDummyGame() {
+		Jugador paco = new Jugador("Paco");
+		Jugador juan = new Jugador("Juan");
+		
+		List<Jugador> pacojuan = new ArrayList<Jugador>();
+		
+		pacojuan.add(paco);
+		pacojuan.add(juan);
+		
+		Partida p1 = new Partida("partida1", 3, pacojuan);
+		
+		long id = lastId.incrementAndGet();
+		p1.setId(id);
+		partidas.put(id, p1);
+	}
 }
