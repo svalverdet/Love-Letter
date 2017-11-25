@@ -1,23 +1,18 @@
 package LoveLetter;
 
-//import java.util.ArrayList;
 import java.util.Collection;
-//import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-//import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,25 +20,66 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/partidas")
 public class PartidasController {
 	
-	//@Autowired
-	//private PartidasService partidasService;
-	
-	private Map<Long, Partida> partidas = new ConcurrentHashMap<>();
-	//private Map<Long, Partida> partidas = new HashMap<Long, Partida>
-	private AtomicLong lastId = new AtomicLong();
+	@Autowired
+	private PartidasService partidasService;
 	
 	
+	//GET
+	@RequestMapping(method = RequestMethod.GET)
+	public Collection<Partida> partidas() {
+		return partidasService.getPartidas();//te devuelve los valores de cada partida
+	}
+	
+	
+	//POST
+	@RequestMapping(method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.CREATED)
+	public Partida nuevaPartida(@RequestBody Partida partida) {
+
+		return partidasService.postPartida(partida);
+	}
+	
+	
+	//GET {id}
+	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
+	public ResponseEntity<Partida> getPartida(@PathVariable long id) {
+
+		Partida partida = partidasService.getPartida(id);//encuentra a la partida
+
+		if (partida != null) {//si existe
+			return new ResponseEntity<>(partida, HttpStatus.OK);//devuelve sus datos
+		} else {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+	}
+	
+	
+	//DELETE
+	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+	public ResponseEntity<Partida> borraPartida(@PathVariable long id) {
+
+		Partida partida = partidasService.deletePartida(id);
+
+		if (partida != null) {
+			return new ResponseEntity<>(partida, HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+	}
 	
 	
 	
-	//@GetMapping("/")//Te da todas las partidas con sus atributos
+	
+	
+	
+	/*
+	//Te da todas las partidas con sus atributos
 	@RequestMapping(method = RequestMethod.GET)
 	public Collection<Partida> partidas() {
 		return partidas.values();//te devuelve los valores de cada partida
 	}
-	
 
-	//@PostMapping("/")//le das un body para meter una partida en la lista
+	//le das un body para meter una partida en la lista
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public Partida nuevaPartida(@RequestBody Partida partida) {
@@ -71,7 +107,7 @@ public class PartidasController {
 		}
 	}
 	
-	//@GetMapping("/{id}")//te devuelve los datos de la partida con la id dada después de "/"
+	//te devuelve los datos de la partida con la id dada después de "/"
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	public ResponseEntity<Partida> getPartida(@PathVariable long id) {
 
@@ -84,7 +120,7 @@ public class PartidasController {
 		}
 	}
 	
-	//@DeleteMapping("/{id}")//elimina la partida con id dada
+	//elimina la partida con id dada
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 	public ResponseEntity<Partida> borraPartida(@PathVariable long id) {
 
@@ -95,5 +131,5 @@ public class PartidasController {
 		} else {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-	}
+	}*/
 }
