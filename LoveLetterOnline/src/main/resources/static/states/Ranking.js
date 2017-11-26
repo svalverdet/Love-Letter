@@ -49,8 +49,12 @@ LoveLetterOnline.Ranking.prototype = {
 	},
 	
 	mostrarJugadores: function(){
+		var textoNombre;
 		for(var i=0; i<5; i++){
-			that.add.text(that.world.centerX, (that.world.centerY-200)+50*i, (i+1) + '. '+jugsRanking[i], {fill: "#ffffff"});
+			if(jugsRanking[i]!==undefined){
+				textoNombre = jugsRanking[i];
+			}else textoNombre = '-';
+			that.add.text(that.world.centerX, (that.world.centerY-200)+50*i, (i+1) + '. '+textoNombre, {fill: "#ffffff"});
 		}
 	},
 	
