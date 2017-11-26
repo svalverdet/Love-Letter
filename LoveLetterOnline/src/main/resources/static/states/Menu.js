@@ -3,6 +3,7 @@ LoveLetterOnline.Menu = function(game){
 };
 
 LoveLetterOnline.Menu.prototype = {
+		
 	create: function(){
 		text1 = this.add.text(this.world.centerX, this.world.centerY-20,'Jugar',{fill: "#ffffff"});
 		text2 = this.add.text(this.world.centerX, this.world.centerY+20,'Ranking',{fill: "#ffffff"});

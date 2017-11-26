@@ -31,13 +31,7 @@ LoveLetterOnline.Login.prototype = {
 			data: JSON.stringify(jugador),
 			processData: false,
 			headers: {
-				'Access-Control-Allow-Origin': 'http://127.0.0.1:8887',
-				'Access-Control-Allow-Origin': '127.0.0.1/:1',
-				'Access-Control-Allow-Origin': 'http://localhost:8080/jugadores',
-				'Access-Control-Allow-Origin': '*',
-				"Access-Control-Allow-Methods": "GET, POST, DELETE, PUT, OPTIONS, HEAD",
 				"Content-Type": "application/json"
-				
 			}
 		}).done(function (jugador) {
 			console.log("Jugador created: " + JSON.stringify(jugador));
