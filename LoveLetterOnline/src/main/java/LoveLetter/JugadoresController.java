@@ -40,7 +40,7 @@ public class JugadoresController {
 		jugador.setId(id);
 		
 		Random rand = new Random();
-		int  n = rand.nextInt(3);
+		int  n = rand.nextInt(8);
 		jugador.setPartidasGanadas(n);
 		
 		jugadores.put(id, jugador);

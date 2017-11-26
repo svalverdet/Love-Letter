@@ -8,11 +8,12 @@ LoveLetterOnline.Login = function(game){
 LoveLetterOnline.Login.prototype = {
 	create: function(){
 		texto = this.add.text(this.world.centerX, this.world.centerY,'Entrar',{fill: "#ffffff"});
+		texto.anchor.x = 0.5;
 		texto.inputEnabled = true;
 		texto.events.onInputDown.add(this.entrar, this);
 		
 		//Se inserta el nombre del jugador. Tal vez se le pueda añadir un temporizador
-		var nomJugador = prompt("Introduce aquí tu nombre", "Player01");
+		var nomJugador = prompt("Introduce aquí tu nombre", "Guest");
 		jugador = {
             nombre: nomJugador
         };

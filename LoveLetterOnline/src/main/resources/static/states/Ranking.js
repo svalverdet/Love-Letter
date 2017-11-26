@@ -58,9 +58,11 @@ LoveLetterOnline.Ranking.prototype = {
 		}
 	},
 	
-	mostrarTexto(){
+	mostrarTexto: function(){
 		texto = that.add.text(that.world.centerX, that.world.centerY-250,'RANKING',{fill: "#ffffff"});
+		texto.anchor.x = 0.5;
 		texto = that.add.text(that.world.centerX, that.world.centerY+150,'Volver',{fill: "#ffffff"});
+		texto.anchor.x = 0.5;
 		texto.inputEnabled = true;
 		texto.events.onInputDown.add(that.volver, this);
 	}

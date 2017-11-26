@@ -6,9 +6,11 @@ var gameOptions = {
 };
 
 var game = new Phaser.Game(gameOptions.gameWidth, gameOptions.gameHeight, Phaser.AUTO);
+var id_jugador;
+
 game.state.add('Menu', LoveLetterOnline.Menu);
 game.state.add('Login', LoveLetterOnline.Login);
-
+game.state.add('Lobby', LoveLetterOnline.Lobby);
 game.state.add('Jugar', LoveLetterOnline.Jugar);
 game.state.add('Ranking', LoveLetterOnline.Ranking);
 

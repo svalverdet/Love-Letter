@@ -6,8 +6,11 @@ LoveLetterOnline.Menu.prototype = {
 		
 	create: function(){
 		text1 = this.add.text(this.world.centerX, this.world.centerY-20,'Jugar',{fill: "#ffffff"});
+		text1.anchor.x = 0.5;
 		text2 = this.add.text(this.world.centerX, this.world.centerY+20,'Ranking',{fill: "#ffffff"});
+		text2.anchor.x = 0.5;
 		text3 = this.add.text(this.world.centerX, this.world.centerY+150,'Volver',{fill: "#ffffff"});
+		text3.anchor.x = 0.5;
 		
 		text1.inputEnabled = true;
 		text1.events.onInputDown.add(this.jugar, this);
@@ -18,8 +21,8 @@ LoveLetterOnline.Menu.prototype = {
 		
 	},
 	jugar: function(){
-		//this.state.start('Lobby');
-		this.state.start('Jugar');
+		this.state.start('Lobby');
+		//this.state.start('Jugar');
 		
 	},
 	ranking: function(){
