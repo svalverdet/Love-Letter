@@ -61,15 +61,21 @@ LoveLetterOnline.Lobby.prototype = {
 		}
 	},
 	
+	obtenerJugador: function(){
+		
+	},
+	
 	addPartida: function(a, b, nombrePartida){
 		
 		var nomPartida = prompt("Introduce aquí el nombre de la partida", "Partida");
 		var numJugs = prompt("Introduce aquí el número de jugadores", "2");
 		
+		var jugCreador = that.obtenerJugador();
+		
 		var p_jav = {
 				nombre: nomPartida,
 				numJugMax: numJugs,
-				jugsPartida: []
+				jugsPartida: [jugCreador]
 		}
 		
 		partidasEnJuego.push(p_jav);

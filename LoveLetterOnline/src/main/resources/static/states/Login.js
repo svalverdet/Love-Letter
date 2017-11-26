@@ -38,7 +38,7 @@ LoveLetterOnline.Login.prototype = {
 			}
 		}).done(function (jugador) {
 			console.log("Jugador created: " + JSON.stringify(jugador));
-			that.id_jugador = jugador.id;
+			game.id_jugador = jugador.id;
 		});
 	}
 };
