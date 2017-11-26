@@ -64,7 +64,105 @@ LoveLetterOnline.Jugar = function(game){
 
 };
 
+/*
+function sacarCartaMazo(jugadorReceptor) {
+	//La carta a repartir se genera encima del mazo
+		var carta = game.add.sprite(game.world.centerX, game.world.centerY, 'carta');
+		carta.anchor.setTo(0.5,0.5);
+		carta.angle = 90;
 
+		//Según el índice se accede al tipo de carta
+		var tipo = mazo[indiceMazo];
+		 //Se asignan las propiedades de la carta                               
+		switch (tipo){
+			case 0:
+			case 1:
+				carta.valor = 0;
+				carta.personaje = "Asesino";
+				carta.tipoframe = 1;
+				break;
+			case 10:
+			case 11:
+				carta.valor = 2;
+				carta.personaje = "Timador";
+				carta.tipoframe = 11;
+				break;
+			case 12:
+			case 13:
+			case 14:
+			case 15:
+				carta.valor = 2;
+				carta.personaje = "Cura";
+				carta.tipoframe = 15;
+				break;
+			case 16:
+			case 17:
+				carta.valor = 3;
+				carta.personaje = "Baron";
+				carta.tipoframe = 17;
+				break;
+			case 18:
+				carta.valor = 3;
+				carta.personaje = "Baronesa";
+				carta.tipoframe = 18;
+				break;
+			case 19:
+				carta.valor = 4;
+				carta.personaje = "Mayordomo";
+				carta.tipoframe = 19;
+				break;
+			case 20:
+			case 21:
+				carta.valor = 4;
+				carta.personaje = "Criada";
+				carta.tipoframe = 21;
+				break;
+			case 22:
+			case 23:
+			case 24:
+				carta.valor = 5;
+				carta.personaje = "Principe";
+				carta.tipoframe = 24;
+				break;
+			case 25:
+				carta.valor = 6;
+				carta.personaje = "Rey";
+				carta.tipoframe = 25;
+				break;
+			case 26:
+				carta.valor = 7;
+				carta.personaje = "Condesa";
+				carta.tipoframe = 26;
+				break;
+			case 27:
+				carta.valor = 8;
+				carta.personaje = "Princesa";
+				carta.tipoframe = 27;
+				break;
+			default:
+				carta.valor = 1;
+				carta.personaje = "Guardia";
+				carta.tipoframe = 9;
+
+		}
+
+		//Cuando se acaba el mazo, se quita la imagen que hacía de mazo
+		if(indiceMazo>mazo.length-2){
+			//cartaMazo.kill();     //Una de dos
+			cartaMazo.destroy();
+		}
+
+
+		//Desplazamiento de la carta hacia la mano del jugador.
+		this.animacionRepartir(carta,tipo,jugadorReceptor);
+
+		//Reparto automático de la primera ronda
+		if(turnos<numeroJugadores) canPlay = true;
+
+		
+		return carta;
+};
+*/
 LoveLetterOnline.Jugar.prototype = {
 	
 	preload: function(){
@@ -130,9 +228,9 @@ LoveLetterOnline.Jugar.prototype = {
 				
 				//Se añade un retardo al reparto inicial
 				if(turnos<=numeroJugadores){  
-					game.time.events.add(450, this.manejadorTurnos);
+					game.time.events.add(450, LoveLetterOnline.Jugar.prototype.manejadorTurnos);
 				}else{
-					this.manejadorTurnos();
+					LoveLetterOnline.Jugar.prototype.manejadorTurnos();
 				}
 				
 			}
@@ -355,7 +453,7 @@ LoveLetterOnline.Jugar.prototype = {
 	}, 
 	
 	sacarCartaMazo: function(jugadorReceptor){
-		//La carta a repartir se genera encima del mazo
+			//La carta a repartir se genera encima del mazo
 		var carta = game.add.sprite(game.world.centerX, game.world.centerY, 'carta');
 		carta.anchor.setTo(0.5,0.5);
 		carta.angle = 90;
@@ -443,7 +541,7 @@ LoveLetterOnline.Jugar.prototype = {
 
 
 		//Desplazamiento de la carta hacia la mano del jugador.
-		this.animacionRepartir(carta,tipo,jugadorReceptor);
+		LoveLetterOnline.Jugar.prototype.animacionRepartir(carta,tipo,jugadorReceptor);
 
 		//Reparto automático de la primera ronda
 		if(turnos<numeroJugadores) canPlay = true;
@@ -502,7 +600,7 @@ LoveLetterOnline.Jugar.prototype = {
 			if(cartasMesaJugadores[0]==null)    cartasMesaJugadores[0]=[carta];
 			else    cartasMesaJugadores[0].push(carta);
 		}
-		this.animacionDescartar(carta, indice);
+		LoveLetterOnline.Jugar.prototype.animacionDescartar(carta, indice);
 	}, 
 	
 	animacionDescartar: function(carta, indice){
@@ -521,7 +619,7 @@ LoveLetterOnline.Jugar.prototype = {
 		//No ha habido otro modo de eliminar la carta
 		delete cartasManoJugadores[turnoJugador][indice];
 
-		game.time.events.add(1500, this.accionCarta, this, carta, indice);
+		game.time.events.add(1500, LoveLetterOnline.Jugar.prototype.accionCarta, this, carta, indice);
 	}, 
 	
 	accionCarta: function(carta, indice){
@@ -538,11 +636,11 @@ LoveLetterOnline.Jugar.prototype = {
 					//No puede realizar la accion sobre sí mismo
 					for(var jugador=1; jugador<numeroJugadores; jugador++){
 						if(cartaDescarteJugadores[jugador].vivo && !jugadorElegido)
-							cartaDescarteJugadores[jugador].events.onInputUp.add(this.eleccionGuardia, this, 0, jugador);
+							cartaDescarteJugadores[jugador].events.onInputUp.add(LoveLetterOnline.Jugar.prototype.eleccionGuardia, this, 0, jugador);
 					}
 				}else{
-					var jugador = this.jugadorVivoAlAzar(false);
-					this.accionGuardia(undefined, undefined, undefined, jugador);
+					var jugador = LoveLetterOnline.Jugar.prototype.jugadorVivoAlAzar(false);
+					LoveLetterOnline.Jugar.prototype.accionGuardia(undefined, undefined, undefined, jugador);
 				}
 				break;
 
@@ -553,16 +651,16 @@ LoveLetterOnline.Jugar.prototype = {
 					//Puede realizar la accion sobre sí mismo
 					for(var jugador=0; jugador<numeroJugadores; jugador++){
 						if(cartaDescarteJugadores[jugador].vivo && !jugadorElegido)
-							cartaDescarteJugadores[jugador].events.onInputUp.add(this.accionTimador, this, 0, carta.personaje, jugador);
+							cartaDescarteJugadores[jugador].events.onInputUp.add(LoveLetterOnline.Jugar.prototype.accionTimador, this, 0, carta.personaje, jugador);
 					}
 				}else{
-					var jugador1 = this.jugadorVivoAlAzar(true);
+					var jugador1 = LoveLetterOnline.Jugar.prototype.jugadorVivoAlAzar(true);
 					//No puede elegir al mismo jugador las dos veces
 					do{
-						var jugador2 = this.jugadorVivoAlAzar(true);
+						var jugador2 = LoveLetterOnline.Jugar.prototype.jugadorVivoAlAzar(true);
 					}while(jugador1===jugador2);
 
-					this.accionTimaRey(undefined, undefined, undefined, carta.personaje, jugador1, jugador2);
+					LoveLetterOnline.Jugar.prototype.accionTimaRey(undefined, undefined, undefined, carta.personaje, jugador1, jugador2);
 				}
 				break;
 			case "Cura":
@@ -572,11 +670,11 @@ LoveLetterOnline.Jugar.prototype = {
 					//No puede realizar la accion sobre sí mismo
 					for(var jugador=1; jugador<numeroJugadores; jugador++){
 						if(cartaDescarteJugadores[jugador].vivo && !jugadorElegido)
-							cartaDescarteJugadores[jugador].events.onInputUp.add(this.accionCura, this, 0, jugador);
+							cartaDescarteJugadores[jugador].events.onInputUp.add(LoveLetterOnline.Jugar.prototype.accionCura, this, 0, jugador);
 					}
 				}else{
-					var jugador = this.jugadorVivoAlAzar(false);
-					this.accionCura(undefined, undefined, undefined, jugador);
+					var jugador = LoveLetterOnline.Jugar.prototype.jugadorVivoAlAzar(false);
+					LoveLetterOnline.Jugar.prototype.accionCura(undefined, undefined, undefined, jugador);
 				}
 				break;
 			
@@ -588,11 +686,11 @@ LoveLetterOnline.Jugar.prototype = {
 					//No puede realizar la accion sobre sí mismo
 					for(var jugador=1; jugador<numeroJugadores; jugador++){
 						if(cartaDescarteJugadores[jugador].vivo && !jugadorElegido)
-							cartaDescarteJugadores[jugador].events.onInputUp.add(this.accionBaronBaronesa, this, 0, jugador, carta.personaje);
+							cartaDescarteJugadores[jugador].events.onInputUp.add(LoveLetterOnline.Jugar.prototype.accionBaronBaronesa, this, 0, jugador, carta.personaje);
 					}
 				}else{
-					var jugador = this.jugadorVivoAlAzar(false);
-					this.accionBaronBaronesa(undefined, undefined, undefined, jugador, carta.personaje);
+					var jugador = LoveLetterOnline.Jugar.prototype.jugadorVivoAlAzar(false);
+					LoveLetterOnline.Jugar.prototype.accionBaronBaronesa(undefined, undefined, undefined, jugador, carta.personaje);
 				}
 				break;
 
@@ -607,7 +705,7 @@ LoveLetterOnline.Jugar.prototype = {
 				console.log("El jugador "+(turnoJugador+1) + " se ha protegido.");
 				textoEventosPartida.shift();
 				textoEventosPartida.push("El jugador "+(turnoJugador+1) + " se ha protegido.");
-				game.time.events.add(1000, this.finTurno);
+				game.time.events.add(1000, LoveLetterOnline.Jugar.prototype.finTurno);
 				break;
 
 			case "Principe":
@@ -617,11 +715,11 @@ LoveLetterOnline.Jugar.prototype = {
 					//Sí puede realizar la accion sobre sí mismo
 					for(var jugador=0; jugador<numeroJugadores; jugador++){
 						if(cartaDescarteJugadores[jugador].vivo && !jugadorElegido)
-							cartaDescarteJugadores[jugador].events.onInputUp.add(this.accionPrincipe, this, 0, jugador);
+							cartaDescarteJugadores[jugador].events.onInputUp.add(LoveLetterOnline.Jugar.prototype.accionPrincipe, this, 0, jugador);
 					}
 				}else{
-					var jugador = this.jugadorVivoAlAzar(true);
-					this.accionPrincipe(undefined, undefined, undefined, jugador);
+					var jugador = LoveLetterOnline.Jugar.prototype.jugadorVivoAlAzar(true);
+					LoveLetterOnline.Jugar.prototype.accionPrincipe(undefined, undefined, undefined, jugador);
 				}
 				break;
 
@@ -632,11 +730,11 @@ LoveLetterOnline.Jugar.prototype = {
 					//No puede realizar la accion sobre sí mismo
 					for(var jugador=1; jugador<numeroJugadores; jugador++){
 						if(cartaDescarteJugadores[jugador].vivo && !jugadorElegido)
-							cartaDescarteJugadores[jugador].events.onInputUp.add(this.accionTimaRey, this, 0, carta.personaje, jugador);
+							cartaDescarteJugadores[jugador].events.onInputUp.add(LoveLetterOnline.Jugar.prototype.accionTimaRey, this, 0, carta.personaje, jugador);
 					}
 				}else{
-					var jugador = this.jugadorVivoAlAzar(false);
-					this.accionTimaRey(undefined, undefined, undefined, carta.personaje, jugador);
+					var jugador = LoveLetterOnline.Jugar.prototype.jugadorVivoAlAzar(false);
+					LoveLetterOnline.Jugar.prototype.accionTimaRey(undefined, undefined, undefined, carta.personaje, jugador);
 				}
 				break;
 
@@ -645,17 +743,17 @@ LoveLetterOnline.Jugar.prototype = {
 				jugadoresVivos--;
 
 				if(indice===0)
-					game.time.events.add(750, this.echarCartaDerrotados, this, cartasManoJugadores[turnoJugador][1], turnoJugador);
+					game.time.events.add(750, LoveLetterOnline.Jugar.prototype.echarCartaDerrotados, this, cartasManoJugadores[turnoJugador][1], turnoJugador);
 				else
-					game.time.events.add(750, this.echarCartaDerrotados, this, cartasManoJugadores[turnoJugador][0], turnoJugador);
+					game.time.events.add(750, LoveLetterOnline.Jugar.prototype.echarCartaDerrotados, this, cartasManoJugadores[turnoJugador][0], turnoJugador);
 				
 				console.log("El jugador "+(turnoJugador+1) + " ha perdido tras descartar a la princesa.");
 				textoEventosPartida.shift();
 				textoEventosPartida.push("El jugador "+(turnoJugador+1) + " ha perdido tras descartar a la princesa.");
-				game.time.events.add(3250, this.finTurno);
+				game.time.events.add(3250, LoveLetterOnline.Jugar.prototype.finTurno);
 				break;
 
-			default: game.time.events.add(50, this.finTurno);
+			default: game.time.events.add(50, LoveLetterOnline.Jugar.prototype.finTurno);
 		}
 	}, 
 	
@@ -673,11 +771,11 @@ LoveLetterOnline.Jugar.prototype = {
 				//De este modo no entrará en un bucle infinito buscando jugadores que no estén protegidos.
 				//Como último recurso, actuará sobre sí mismo si todos están protegidos.
 				if(jugProts>=numeroJugadores-1) return numJug; 
-				else return this.jugadorVivoAlAzar(self);
+				else return LoveLetterOnline.Jugar.prototype.jugadorVivoAlAzar(self);
 			}
 			else return numJug;
 		else
-			return this.jugadorVivoAlAzar(self);
+			return LoveLetterOnline.Jugar.prototype.jugadorVivoAlAzar(self);
 	}, 
 	
 	finTurno: function(){
@@ -689,7 +787,7 @@ LoveLetterOnline.Jugar.prototype = {
 			canPlay = true;
 		}else{
 			//Se determina quién ha ganado
-			this.finPartida(); 
+			LoveLetterOnline.Jugar.prototype.finPartida(); 
 		}
 	}, 
 	
@@ -728,7 +826,7 @@ LoveLetterOnline.Jugar.prototype = {
 			textoEventosPartida.push("...el jugador "+(jGanador+1)+" !");
 
 			game.time.events.add(1000, function(){
-				this.echarCartaDerrotados(carta, jGanador);
+				LoveLetterOnline.Jugar.prototype.echarCartaDerrotados(carta, jGanador);
 			});
 		}
 		else{
@@ -757,12 +855,12 @@ LoveLetterOnline.Jugar.prototype = {
 			textoEventosPartida.push("...el jugador "+(jVivo+1)+" !");
 			
 			game.time.events.add(1000, function(){
-				this.echarCartaDerrotados(carta, jVivo);
+				LoveLetterOnline.Jugar.prototype.echarCartaDerrotados(carta, jVivo);
 			});
 		}
 
 
-		if(this.finJuego()){
+		if(LoveLetterOnline.Jugar.prototype.finJuego()){
 			canPlay = false;
 			textoEventosPartida.shift();
 			textoEventosPartida.push("Parece que alguien ha conseguido todos los corazones.");
@@ -795,7 +893,7 @@ LoveLetterOnline.Jugar.prototype = {
 			}
 		}
 
-		game.time.events.add(5000, this.resetear);
+		game.time.events.add(5000, LoveLetterOnline.Jugar.prototype.resetear);
 	}, 
 	
 	manejadorTurnos: function(){
@@ -806,18 +904,17 @@ LoveLetterOnline.Jugar.prototype = {
 			//if-else evita el error de undefined porque al pricipio el array está vacío.
 			if(turnos<numeroJugadores){ 
 				
-				//cartasManoJugadores[turnoJugador] = [this.sacarCartaMazo(turnoJugador)];			//Solución: LoveLetterOnline.Jugar.prototype...
-				cartasManoJugadores[turnoJugador] = [LoveLetterOnline.Jugar.prototype.sacarCartaMazo(turnoJugador)];
-				if(turnoJugador===0) {																
-					if(cartasManoJugadores[0][0] != undefined)										
+				cartasManoJugadores[turnoJugador] = [LoveLetterOnline.Jugar.prototype.sacarCartaMazo(turnoJugador)];			// POR ALGÚN MOTIVO ESTO LO DETECTA COMO FUNCIÓN NO DEFINIDA
+				if(turnoJugador===0) {																//se puede quitar los argumentos para que al menos no salte error
+					if(cartasManoJugadores[0][0] != undefined)										//Solución: sacar todas las funciones fuera...
 					cartasManoJugadores[0][0].inputEnabled=true;
 				}
 			}else {
 				//Si la posicion x está vacía, rellenala al robar carta
 				if(cartasManoJugadores[turnoJugador][0]==undefined){
-					cartasManoJugadores[turnoJugador][0] = this.sacarCartaMazo(turnoJugador);
+					cartasManoJugadores[turnoJugador][0] = LoveLetterOnline.Jugar.prototype.sacarCartaMazo(turnoJugador);
 				}else{
-					cartasManoJugadores[turnoJugador][1] = this.sacarCartaMazo(turnoJugador);
+					cartasManoJugadores[turnoJugador][1] = LoveLetterOnline.Jugar.prototype.sacarCartaMazo(turnoJugador);
 				}
 				//Se permite interactuar con el ratón clicando en las cartas
 				if(turnoJugador===0) {
@@ -849,15 +946,15 @@ LoveLetterOnline.Jugar.prototype = {
 				//El jugador está obligado a descartar la condesa si tiene un príncipe o un rey
 				if((cartasManoJugadores[turnoJugador][0].personaje === "Condesa") && (cartasManoJugadores[turnoJugador][1].personaje === "Principe" || cartasManoJugadores[turnoJugador][1].personaje === "Rey"))
 				{
-					game.time.events.add(1500, this.elegirCarta, undefined, cartasManoJugadores[turnoJugador][0], undefined, undefined, 0, true);              
+					game.time.events.add(1500, LoveLetterOnline.Jugar.prototype.elegirCarta, undefined, cartasManoJugadores[turnoJugador][0], undefined, undefined, 0, true);              
 				}else if((cartasManoJugadores[turnoJugador][1].personaje === "Condesa") && (cartasManoJugadores[turnoJugador][0].personaje === "Principe" || cartasManoJugadores[turnoJugador][0].personaje === "Rey"))
 				{
-					game.time.events.add(1500, this.elegirCarta, undefined, cartasManoJugadores[turnoJugador][1], undefined, undefined, 1, true);
+					game.time.events.add(1500, LoveLetterOnline.Jugar.prototype.elegirCarta, undefined, cartasManoJugadores[turnoJugador][1], undefined, undefined, 1, true);
 				}
 				else{
-					if(cartasManoJugadores[0][0] !== undefined) {cartasManoJugadores[0][0].events.onInputUp.add(this.elegirCarta, this, 0, 0, false);}
-					if(cartasManoJugadores[0][1] !== undefined) {cartasManoJugadores[0][1].events.onInputUp.add(this.elegirCarta, this, 0, 1, false);}
-					if(turnoJugador!==0){game.time.events.add(800, this.elegirCarta, undefined, undefined, undefined, undefined, undefined, false)};
+					if(cartasManoJugadores[0][0] !== undefined) {cartasManoJugadores[0][0].events.onInputUp.add(LoveLetterOnline.Jugar.prototype.elegirCarta, this, 0, 0, false);}
+					if(cartasManoJugadores[0][1] !== undefined) {cartasManoJugadores[0][1].events.onInputUp.add(LoveLetterOnline.Jugar.prototype.elegirCarta, this, 0, 1, false);}
+					if(turnoJugador!==0){game.time.events.add(800, LoveLetterOnline.Jugar.prototype.elegirCarta, undefined, undefined, undefined, undefined, undefined, false)};
 				}
 			}
 			else{
@@ -866,7 +963,7 @@ LoveLetterOnline.Jugar.prototype = {
 
 			indiceMazo++;
 		}else{
-			this.finTurno();
+			LoveLetterOnline.Jugar.prototype.finTurno();
 		}
 	}, 
 	
@@ -903,7 +1000,7 @@ LoveLetterOnline.Jugar.prototype = {
 		
 		//Puede realizar la accion sobre sí mismo
 		for(var btn=0; btn<botones.length;btn++)
-			botones[btn].onInputDown.add(this.accionGuardia, carta, this, 0, jugador, btn);
+			botones[btn].onInputDown.add(LoveLetterOnline.Jugar.prototype.accionGuardia, carta, this, 0, jugador, btn);
 	}, 
 	
 	accionGuardia: function(carta, a, b, jugador, btn){
@@ -938,9 +1035,9 @@ LoveLetterOnline.Jugar.prototype = {
 						cartaDescarteJugadores[jugador].vivo = false;
 						jugadoresVivos--;
 						if(indice===0)
-							game.time.events.add(750, this.echarCartaDerrotados, this, cartaAcusada, jugador);
+							game.time.events.add(750, LoveLetterOnline.Jugar.prototype.echarCartaDerrotados, this, cartaAcusada, jugador);
 						else
-							game.time.events.add(750, this.echarCartaDerrotados, this, cartaAcusada, jugador);
+							game.time.events.add(750, LoveLetterOnline.Jugar.prototype.echarCartaDerrotados, this, cartaAcusada, jugador);
 					
 						console.log("El jugador " + (turnoJugador+1)+" ha acusado al jugador " + (jugador+1)+" de tener un/a "+acusacion+" y ha acertado.\nEl jugador "+(jugador+1)+" ha sido eliminado.");
 						textoEventosPartida.shift();
@@ -970,7 +1067,7 @@ LoveLetterOnline.Jugar.prototype = {
 				guardiaActivo = false;
 			});
 
-			game.time.events.add(2750, this.finTurno);
+			game.time.events.add(2750, LoveLetterOnline.Jugar.prototype.finTurno);
 		}
 	}, 
 	
@@ -982,7 +1079,7 @@ LoveLetterOnline.Jugar.prototype = {
 		//Puede realizar la accion sobre sí mismo
 		for(var jugador2=0; jugador2<numeroJugadores; jugador2++){
 			if(cartaDescarteJugadores[jugador2].vivo)
-				cartaDescarteJugadores[jugador2].events.onInputUp.add(this.accionTimaRey, this, 0, person, jugador1, jugador2);
+				cartaDescarteJugadores[jugador2].events.onInputUp.add(LoveLetterOnline.Jugar.prototype.accionTimaRey, this, 0, person, jugador1, jugador2);
 		}
 	}, 
 	
@@ -1001,7 +1098,7 @@ LoveLetterOnline.Jugar.prototype = {
 				//Puede realizar la accion sobre sí mismo
 				for(var jugador=0; jugador<numeroJugadores; jugador++){                                     //Podría interferir con la llamada a siguiente turno de abajo
 					if(cartaDescarteJugadores[jugador].vivo && !jugadorElegido)
-						cartaDescarteJugadores[jugador].events.onInputUp.add(this.accionTimador, this, 0, carta.personaje, jugador);
+						cartaDescarteJugadores[jugador].events.onInputUp.add(LoveLetterOnline.Jugar.prototype.accionTimador, this, 0, carta.personaje, jugador);
 				}
 			}
 
@@ -1084,7 +1181,7 @@ LoveLetterOnline.Jugar.prototype = {
 		}
 		
 
-		game.time.events.add(3500, this.finTurno);                    
+		game.time.events.add(3500, LoveLetterOnline.Jugar.prototype.finTurno);                    
 	}, 
 	
 	accionCura: function(carta, a, b, jugador){
@@ -1114,7 +1211,7 @@ LoveLetterOnline.Jugar.prototype = {
 			textoEventosPartida.push("El jugador " + (turnoJugador+1)+" no ha podido verle la mano al jugador " + (jugador+1));
 		}
 		
-		game.time.events.add(1000, this.finTurno);
+		game.time.events.add(1000, LoveLetterOnline.Jugar.prototype.finTurno);
 	}, 
 	
 	accionBaronBaronesa: function(carta, a, b, jugador, person){
@@ -1150,7 +1247,7 @@ LoveLetterOnline.Jugar.prototype = {
 			if((retado.valor>retadoR.valor && person==="Baron") || (retado.valor<retadoR.valor && person==="Baronesa")){
 				jugadoresVivos--;
 				
-				game.time.events.add(750, this.echarCartaDerrotados, this, retadoR, turnoJugador);
+				game.time.events.add(750, LoveLetterOnline.Jugar.prototype.echarCartaDerrotados, this, retadoR, turnoJugador);
 				
 				cartaDescarteJugadores[turnoJugador].vivo = false;
 				console.log("El jugador " + (jugador+1)+" ha salido victorioso."); 
@@ -1161,7 +1258,7 @@ LoveLetterOnline.Jugar.prototype = {
 			}else if((retado.valor<retadoR.valor && person==="Baron") || (retado.valor>retadoR.valor && person==="Baronesa")){
 				jugadoresVivos--;
 				
-				game.time.events.add(750, this.echarCartaDerrotados, this, retado, jugador);
+				game.time.events.add(750, LoveLetterOnline.Jugar.prototype.echarCartaDerrotados, this, retado, jugador);
 
 				cartaDescarteJugadores[jugador].vivo = false;
 				console.log("El jugador " + (turnoJugador+1)+" ha salido victorioso.");
@@ -1181,7 +1278,7 @@ LoveLetterOnline.Jugar.prototype = {
 			textoEventosPartida.push("El jugador " + (turnoJugador+1)+" no ha podido compararse con el jugador " + (jugador+1));
 		}
 		
-		game.time.events.add(3250, this.finTurno);
+		game.time.events.add(3250, LoveLetterOnline.Jugar.prototype.finTurno);
 	}, 
 	
 	accionPrincipe: function(carta, a, b, jugador){
@@ -1195,15 +1292,15 @@ LoveLetterOnline.Jugar.prototype = {
 			if(cartasManoJugadores[jugador][0]==undefined){
 				carta_bis = cartasManoJugadores[jugador][1];
 				indice = 1;
-				if(carta_bis.personaje!=="Princesa"){cartasManoJugadores[jugador][0]=this.sacarCartaMazo(jugador);}
+				if(carta_bis.personaje!=="Princesa"){cartasManoJugadores[jugador][0]=LoveLetterOnline.Jugar.prototype.sacarCartaMazo(jugador);}
 			}
 			else{
 				carta_bis = cartasManoJugadores[jugador][0];
 				indice = 0;
-				if(carta_bis.personaje!=="Princesa"){cartasManoJugadores[jugador][1]=this.sacarCartaMazo(jugador);}
+				if(carta_bis.personaje!=="Princesa"){cartasManoJugadores[jugador][1]=LoveLetterOnline.Jugar.prototype.sacarCartaMazo(jugador);}
 			}
 
-			game.time.events.add(150, this.principeDescartar, this, carta_bis, jugador, indice);
+			game.time.events.add(150, LoveLetterOnline.Jugar.prototype.principeDescartar, this, carta_bis, jugador, indice);
 
 			
 		}else{
@@ -1211,7 +1308,7 @@ LoveLetterOnline.Jugar.prototype = {
 			textoEventosPartida.shift();
 			textoEventosPartida.push("El jugador " + (turnoJugador+1)+" no ha podido hacer descartarse al jugador " + (jugador+1));
 		}
-		game.time.events.add(2500, this.finTurno);
+		game.time.events.add(2500, LoveLetterOnline.Jugar.prototype.finTurno);
 	}, 
 	
 	principeDescartar: function(carta_bis, jugador, indice){
