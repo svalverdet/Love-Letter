@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 package LoveLetter;
 
 import java.util.Collection;
@@ -88,6 +89,8 @@ public class JugadoresController {
 
 }
 =======
+=======
+>>>>>>> 13e361f3069cf40dd6ab007ff61ec410f603c140
 package LoveLetter;
 
 import java.util.Collection;
@@ -176,4 +179,7 @@ public class JugadoresController {
 		}
 	}
 }
+<<<<<<< HEAD
 >>>>>>> daf3d818c3c167a34dbdd970424672b810091810
+=======
+>>>>>>> 13e361f3069cf40dd6ab007ff61ec410f603c140
