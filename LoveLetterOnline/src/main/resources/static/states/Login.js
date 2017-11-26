@@ -3,10 +3,12 @@ var LoveLetterOnline = {};
 LoveLetterOnline.Login = function(game){
 	var texto, jugador;
 	var method, url, data, processData, headers;
+	var that;
 };
 
 LoveLetterOnline.Login.prototype = {
 	create: function(){
+		that = this;
 		texto = this.add.text(this.world.centerX, this.world.centerY,'Entrar',{fill: "#ffffff"});
 		texto.anchor.x = 0.5;
 		texto.inputEnabled = true;
@@ -36,6 +38,7 @@ LoveLetterOnline.Login.prototype = {
 			}
 		}).done(function (jugador) {
 			console.log("Jugador created: " + JSON.stringify(jugador));
+			that.id_jugador = jugador.id;
 		});
 	}
 };

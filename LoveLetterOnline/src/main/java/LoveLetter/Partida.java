@@ -16,7 +16,6 @@ public class Partida {
 	 
 	 public Partida(String nombre, int numJugMax, List<Jugador> jugadores) {
 		 this.nomPartida = nombre;
-		 this.numJug = 0;
 		 this.numJugMax = numJugMax;
 		 this.jugsPartida = jugadores;
 	 }

@@ -3,6 +3,7 @@ LoveLetterOnline.Lobby = function(game){
 	var texto;
 	var texto_AddPartida;
 	var that;
+	var texto_partidasEnJuego = [];
 	var partidasEnJuego = [];
 };
 
@@ -10,6 +11,7 @@ LoveLetterOnline.Lobby.prototype = {
 	
 	create: function(){
 		that = this;
+		texto_partidasEnJuego = [];
 		partidasEnJuego = [];
 		this.mostrarTexto();
 		
@@ -64,9 +66,21 @@ LoveLetterOnline.Lobby.prototype = {
 		var nomPartida = prompt("Introduce aquí el nombre de la partida", "Partida");
 		var numJugs = prompt("Introduce aquí el número de jugadores", "2");
 		
-		var offset = partidasEnJuego.length;
-		var p = that.add.text(that.world.centerX-150, (that.world.centerY-150)+50*offset,nomPartida+'             para '+numJugs+' jugadores',{fill: "#ffffff"});
-		partidasEnJuego.push(p);
+		var p_jav = {
+				nombre: nomPartida,
+				numJugMax: numJugs,
+				jugsPartida: []
+		}
+		
+		partidasEnJuego.push(p_jav);
+		
+		var offset = texto_partidasEnJuego.length;
+		var p = that.add.text(that.world.centerX-150, (that.world.centerY-150)+50*offset,nomPartida+': para '+numJugs+' jugadores',{fill: "#ffffff"});
+		p.inputEnabled = true;
+		texto_partidasEnJuego.push(p);
+		
+		
+		
 	},
 	
 	mostrarTexto: function(){
