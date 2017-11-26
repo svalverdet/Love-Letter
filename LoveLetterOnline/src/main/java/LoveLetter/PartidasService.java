@@ -2,17 +2,17 @@ package LoveLetter;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.stereotype.Component;
 
 @Component
 public class PartidasService {
-	private Map<Long, Partida> partidas = new ConcurrentHashMap<>();
-	//private Map<Long, Partida> partidas = new HashMap<Long, Partida>
+	//private Map<Long, Partida> partidas = new ConcurrentHashMap<>();
+	private Map<Long, Partida> partidas = new HashMap<Long, Partida>();
 	private AtomicLong lastId = new AtomicLong();
 	
 	
