@@ -62,7 +62,13 @@ LoveLetterOnline.Lobby.prototype = {
 	},
 	
 	obtenerJugador: function(){
-		
+		$.ajax({
+			url: 'http://localhost:8080/jugadores/' + game.id_jugador
+		}).done(function (jugador) {
+			console.log('Jugador loaded: ' + JSON.stringify(jugador));
+			
+		});
+		return jugador;
 	},
 	
 	addPartida: function(a, b, nombrePartida){
