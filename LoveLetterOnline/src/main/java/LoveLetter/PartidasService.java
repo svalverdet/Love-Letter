@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class PartidasService {
-	//private Map<Long, Partida> partidas = new ConcurrentHashMap<>();
 	private Map<Long, Partida> partidas = new HashMap<Long, Partida>();
 	private AtomicLong lastId = new AtomicLong();
 	

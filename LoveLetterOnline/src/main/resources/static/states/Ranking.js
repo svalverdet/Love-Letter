@@ -1,36 +1,63 @@
-LoveLetterOnline.Ranking = function(game){};
 
 LoveLetterOnline.Ranking = function(game){
-	var jugadores = [];
+	var jugsRanking = [];
 	var texto;
+	var that;
 	
 };
 
+var jugsRanking = [];
+var texto;
+var juego;
+
 LoveLetterOnline.Ranking.prototype = {
+	
 	create: function(){
+		juego = LoveLetterOnline.Ranking.prototype;
+		that = this;
 		
-		this.mostrarJugadores();
+		//$(document).ready(function(){})
+		this.loadJugadores(function(jugadores){
+			
+			that.mostrarTexto();
+			
+			//Cuando los jugadores se han cargado desde el servidor
+			for(var i=0; i<jugadores.length; i++){
+				jugsRanking.push(jugadores[i].partidasGanadas);
+				
+			}
+			
+			that.mostrarJugadores();
+			
+		});
 		
 		
-		/////// 4444 ////
-		texto = this.add.text(this.world.centerX, this.world.centerY-250,'RANKING',{fill: "#ffffff"});
-		texto = this.add.text(this.world.centerX, this.world.centerY+150,'Volver',{fill: "#ffffff"});
-		texto.inputEnabled = true;
-		texto.events.onInputDown.add(this.volver, this);
 		
-		
-		
+				
 	},
 	volver: function(){
 		this.state.start('Menu');
 	},
 	
-	mostrarJugadores: function(){
+	loadJugadores: function(callback){
 		$.ajax({
 			url: 'http://localhost:8080/jugadores'
 		}).done(function (jugadores) {
 			console.log('Jugadores loaded: ' + JSON.stringify(jugadores));
-			
+			callback(jugadores);
 		});
+	},
+	
+	mostrarJugadores: function(){
+		for(var i=0; i<5; i++){
+			that.add.text(that.world.centerX, (that.world.centerY-200)+50*i, (i+1) + '. '+jugsRanking[i], {fill: "#ffffff"});
+		}
+	},
+	
+	mostrarTexto(){
+		texto = that.add.text(that.world.centerX, that.world.centerY-250,'RANKING',{fill: "#ffffff"});
+		texto = that.add.text(that.world.centerX, that.world.centerY+150,'Volver',{fill: "#ffffff"});
+		texto.inputEnabled = true;
+		texto.events.onInputDown.add(that.volver, this);
 	}
 };

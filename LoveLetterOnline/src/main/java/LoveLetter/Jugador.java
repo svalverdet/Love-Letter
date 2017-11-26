@@ -1,5 +1,7 @@
 package LoveLetter;
 
+//import java.util.Random;
+
 public class Jugador {
 	private long id = -1;
 	private String nombre;
@@ -11,8 +13,13 @@ public class Jugador {
 	public Jugador() {}
 	
 	public Jugador(String nombre) {
-		this.nombre = nombre;
-		this.partidasGanadas = 0;
+		
+		//Random rand = new Random();
+		//int  n = rand.nextInt(3);
+		
+		this.nombre = "Juan";
+		//this.partidasGanadas = 0;
+		this.partidasGanadas = 50;
 	}
 	
 	
