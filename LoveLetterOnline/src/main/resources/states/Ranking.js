@@ -1,10 +1,10 @@
-var LoveLetterOnline = {};
+LoveLetterOnline.Ranking = function(game){};
 
-LoveLetterOnline.Login = function(game){
+LoveLetterOnline.Ranking = function(game){
 	var texto;
 };
 
-LoveLetterOnline.Login.prototype = {
+LoveLetterOnline.Ranking.prototype = {
 	create: function(){
 		texto = this.add.text(this.world.centerX, this.world.centerY,'Entrar',{fill: "#ffffff"});
 		texto.inputEnabled = true;
