@@ -5,6 +5,7 @@ LoveLetterOnline.Lobby = function(game){
 	var that;
 	var texto_partidasEnJuego = [];
 	var partidasEnJuego = [];
+	var jugCreador;
 };
 
 LoveLetterOnline.Lobby.prototype = {
@@ -13,6 +14,9 @@ LoveLetterOnline.Lobby.prototype = {
 		that = this;
 		texto_partidasEnJuego = [];
 		partidasEnJuego = [];
+		
+		jugCreador = this.obtenerJugador();
+		
 		this.mostrarTexto();
 		
 		//$(document).ready(function(){})
@@ -49,6 +53,7 @@ LoveLetterOnline.Lobby.prototype = {
 			console.log('Partidas loaded: ' + JSON.stringify(partidas));
 			callback(partidas);
 		});
+		
 	},
 	
 	mostrarJugadores: function(){
@@ -69,6 +74,7 @@ LoveLetterOnline.Lobby.prototype = {
 			
 		});
 		return jugador;
+		
 	},
 	
 	addPartida: function(a, b, nombrePartida){
@@ -76,15 +82,15 @@ LoveLetterOnline.Lobby.prototype = {
 		var nomPartida = prompt("Introduce aquí el nombre de la partida", "Partida");
 		var numJugs = prompt("Introduce aquí el número de jugadores", "2");
 		
-		var jugCreador = that.obtenerJugador();
-		
 		var p_jav = {
-				nombre: nomPartida,
-				numJugMax: numJugs,
-				jugsPartida: [jugCreador]
-		}
-		
+					nombre: nomPartida,
+					numJugMax: numJugs,
+					jugsPartida: [jugCreador]
+			}
 		partidasEnJuego.push(p_jav);
+		
+		
+		
 		
 		var offset = texto_partidasEnJuego.length;
 		var p = that.add.text(that.world.centerX-150, (that.world.centerY-150)+50*offset,nomPartida+': para '+numJugs+' jugadores',{fill: "#ffffff"});
