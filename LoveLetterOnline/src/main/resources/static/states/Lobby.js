@@ -5,7 +5,9 @@ LoveLetterOnline.Lobby = function(game){
 	var that;
 	var texto_partidasEnJuego = [];
 	var partidasEnJuego = [];
-	var jugCreador;
+	var jugActual;
+	var partida;
+	
 };
 
 LoveLetterOnline.Lobby.prototype = {
@@ -15,33 +17,24 @@ LoveLetterOnline.Lobby.prototype = {
 		texto_partidasEnJuego = [];
 		partidasEnJuego = [];
 		
-		jugCreador = this.obtenerJugador();
-		
-		this.mostrarTexto();
+		this.obtenerJugador(function(jugador){
+			jugActual = jugador;
+		});
 		
 		//$(document).ready(function(){})
-		/*
-		 
 		 this.loadPartidas(function(partidas){
 			
 			that.mostrarTexto();
 			
 			//Cuando las partidas se han cargado desde el servidor
-			/*
 			for(var i=0; i<partidas.length; i++){
-				jugsRanking.push(jugadores[i].partidasGanadas);
-				
+				partidasEnJuego.push(partidas[i]);
 			}
 			
-			//that.mostrarJugadores();
-			
+			that.mostrarPartidas();
 		});
-		*/
-		
-		
-		
-				
 	},
+	
 	volver: function(){
 		this.state.start('Menu');
 	},
@@ -50,60 +43,115 @@ LoveLetterOnline.Lobby.prototype = {
 		$.ajax({
 			url: 'http://localhost:8080/partidas'
 		}).done(function (partidas) {
-			console.log('Partidas loaded: ' + JSON.stringify(partidas));
+			//console.log('Partidas loaded: ' + JSON.stringify(partidas));
 			callback(partidas);
 		});
 		
 	},
 	
-	mostrarJugadores: function(){
-		var textoNombre;
+	mostrarPartidas: function(){
+		var offset, p_i;
 		for(var i=0; i<5; i++){
-			if(jugsRanking[i]!==undefined){
-				textoNombre = jugsRanking[i];
-			}else textoNombre = '-';
-			that.add.text(that.world.centerX, (that.world.centerY-200)+50*i, (i+1) + '. '+textoNombre, {fill: "#ffffff"});
+			p_i = partidasEnJuego[i];
+			offset = texto_partidasEnJuego.length;
+			if(p_i!==undefined){
+				var linea = {
+					texto: that.add.text(that.world.centerX-150, (that.world.centerY-150)+50*offset, p_i.nomPartida+': para '+p_i.numJugMax+' jugadores. ('+p_i.numJug+'/'+p_i.numJugMax+')',{fill: "#ffffff"}),
+					id: p_i.id
+				};
+				linea.texto.inputEnabled = true;
+				linea.texto.events.onInputDown.add(that.unirsePartida, this, 0, linea);
+				texto_partidasEnJuego.push(linea);
+			}
 		}
+		
 	},
 	
-	obtenerJugador: function(){
+	putPartida: function(partida_tmp){
+		$.ajax({
+			method: "PUT",
+			url: 'http://localhost:8080/partidas/' + partida_tmp.id,
+			data: JSON.stringify(partida_tmp),
+			processData: false,
+			headers: {
+				"Content-Type": "application/json"
+			}
+		}).done(function (partida_tmp) {
+			console.log("Partida updated: " + JSON.stringify(partida_tmp));
+		});
+	},
+	
+	unirsePartida: function(a,b, linea){
+		var id_tmp = linea.id;
+		var partida_tmp;
+		
+		that.obtenerPartida(function(partida){
+			partida_tmp = partida;
+			partida_tmp.jugsPartida.push(jugActual);
+			partida_tmp.numJug++;
+			that.putPartida(partida_tmp);
+			game.state.start('Lobby');
+		}, id_tmp);
+		
+		
+		
+	},
+	
+	obtenerPartida: function(callback, id_tmp){
+		$.ajax({
+			url: 'http://localhost:8080/partidas/' + id_tmp
+		}).done(function (partida) {
+			console.log('Partida loaded: ' + JSON.stringify(partida));
+			callback(partida);
+		});
+	},
+	
+	obtenerJugador: function(callback){
 		$.ajax({
 			url: 'http://localhost:8080/jugadores/' + game.id_jugador
 		}).done(function (jugador) {
 			console.log('Jugador loaded: ' + JSON.stringify(jugador));
-			
+			callback(jugador);
 		});
-		return jugador;
+		
 		
 	},
 	
-	addPartida: function(a, b, nombrePartida){
-		
-		var nomPartida = prompt("Introduce aquí el nombre de la partida", "Partida");
-		var numJugs = prompt("Introduce aquí el número de jugadores", "2");
-		
-		var p_jav = {
-					nombre: nomPartida,
-					numJugMax: numJugs,
-					jugsPartida: [jugCreador]
+	postPartida: function(){
+		$.ajax({
+			method: "POST",
+			url: 'http://localhost:8080/partidas',
+			data: JSON.stringify(partida),
+			processData: false,
+			headers: {
+				"Content-Type": "application/json"
 			}
-		partidasEnJuego.push(p_jav);
-		
-		
-		
-		
-		var offset = texto_partidasEnJuego.length;
-		var p = that.add.text(that.world.centerX-150, (that.world.centerY-150)+50*offset,nomPartida+': para '+numJugs+' jugadores',{fill: "#ffffff"});
-		p.inputEnabled = true;
-		texto_partidasEnJuego.push(p);
-		
-		
+		}).done(function (partida) {
+			console.log("Partida created: " + JSON.stringify(partida));
+		});
+	},
+	
+	addPartida: function(){
+			
+		var nomPartida = prompt("Introduce aquí el nombre de la partida", "Default_Game");
+		var numJugs = prompt("Introduce aquí el número de jugadores", "4");
+			
+		partida = {
+					nomPartida: nomPartida,
+					numJugMax: numJugs,
+					numJug: 1,
+					jugsPartida: [jugActual]
+		};
+			
+		that.postPartida();
+		game.state.start('Lobby');
 		
 	},
 	
 	mostrarTexto: function(){
-		texto = that.add.text(that.world.centerX, that.world.centerY-250,'L O V E  L E T T E R  O N L I N E',{fill: "#ffffff"});
+		texto = that.add.text(that.world.centerX, that.world.centerY-250,'L O V E   L E T T E R   O N L I N E',{fill: "#ffffff"});
 		texto.anchor.x = 0.5;
+		
 		texto = that.add.text(that.world.centerX, that.world.centerY+150,'Volver',{fill: "#ffffff"});
 		texto.anchor.x = 0.5;
 		texto.inputEnabled = true;
@@ -112,6 +160,6 @@ LoveLetterOnline.Lobby.prototype = {
 		texto_AddPartida = that.add.text(that.world.centerX-150, that.world.centerY-200,'Crear partida',{fill: "#ffffff"});
 		texto_AddPartida.anchor.x = 0.5;
 		texto_AddPartida.inputEnabled = true;
-		texto_AddPartida.events.onInputDown.add(that.addPartida, this, 0, "Partida 1");
+		texto_AddPartida.events.onInputDown.add(that.addPartida, this);
 	}
 };

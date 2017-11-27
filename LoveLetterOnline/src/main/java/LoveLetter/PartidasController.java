@@ -50,6 +50,24 @@ public class PartidasController {
 	}
 	
 	
+	//PUT
+	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+	public ResponseEntity<Partida> actualizaPartida(@PathVariable long id, @RequestBody Partida partidaActualizada) {
+
+		Partida partida = partidasService.actualizaPartida(id, partidaActualizada);
+
+		if (partida != null) {
+			return new ResponseEntity<>(partidaActualizada, HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+		}
+	}
+	
+	
+	
+	
+	
 	//DELETE
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 	public ResponseEntity<Partida> borraPartida(@PathVariable long id) {

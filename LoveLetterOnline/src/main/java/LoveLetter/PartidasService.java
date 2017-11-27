@@ -41,6 +41,13 @@ public class PartidasService {
 		return partidas.get(id);
 	}
 	
+	//PUT
+	public Partida actualizaPartida(Long id, Partida partidaAct) {
+		partidaAct.setId(id);
+		partidas.put(id, partidaAct);
+		return partidaAct;
+	}
+	
 	//DELETE
 	public Partida deletePartida(Long id) {
 		return partidas.remove(id);

@@ -2,7 +2,6 @@ var LoveLetterOnline = {};
 
 LoveLetterOnline.Login = function(game){
 	var texto, jugador;
-	var method, url, data, processData, headers;
 	var that;
 };
 
@@ -20,10 +19,34 @@ LoveLetterOnline.Login.prototype = {
             nombre: nomJugador
         };
 	},
+	
+	//Hacer el login
 	entrar: function(){
+		that.loadJugadores(function(jugadores){
+			var nuevo = true;
+			var id_tmp;
+			for(var i=0; i<jugadores.length; i++){
+				if(jugadores[i].nombre == jugador.nombre){
+					nuevo = false;
+					id_tmp = jugadores[i].id;
+				}
+			}
+			
+			if(nuevo == false){
+				console.log("no se crea");
+				game.id_jugador = id_tmp;
+				
+			}else{
+				console.log("se crea");
+				that.createJugador(jugador);
+				
+			}
+			
+			game.state.start('Menu');
+			
+			
+		});
 		
-		LoveLetterOnline.Login.prototype.createJugador(jugador);
-		this.state.start('Menu');
 	},
 	
 	//Create jugador in server
@@ -39,6 +62,15 @@ LoveLetterOnline.Login.prototype = {
 		}).done(function (jugador) {
 			console.log("Jugador created: " + JSON.stringify(jugador));
 			game.id_jugador = jugador.id;
+		});
+	},
+	
+	loadJugadores: function(callback){
+		$.ajax({
+			url: 'http://localhost:8080/jugadores'
+		}).done(function (jugadores) {
+			console.log('Jugadores loaded: ' + JSON.stringify(jugadores));
+			callback(jugadores);
 		});
 	}
 };
