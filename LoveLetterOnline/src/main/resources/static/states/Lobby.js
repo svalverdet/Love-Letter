@@ -87,10 +87,22 @@ LoveLetterOnline.Lobby.prototype = {
 		
 		that.obtenerPartida(function(partida){
 			partida_tmp = partida;
-			partida_tmp.jugsPartida.push(jugActual);
-			partida_tmp.numJug++;
-			that.putPartida(partida_tmp);
-			game.state.start('Lobby');
+			var jugs = partida_tmp.jugsPartida;
+			var canJoin = true;
+			for(id in jugs){
+				if(game.id_jugador == id){
+					canJoin=false;
+				}
+			}
+			if(canJoin && (partida_tmp.numJug < partida_tmp.numJugMax)){
+				partida_tmp.jugsPartida.push(jugActual);
+				partida_tmp.numJug++;
+				that.putPartida(partida_tmp);
+				game.state.start('Lobby');
+			}else{
+				alert("No puedes unirte porque ya estás unido. Sería demasiado meta. O simplemente porque no cabes.");
+			}
+			
 		}, id_tmp);
 		
 		

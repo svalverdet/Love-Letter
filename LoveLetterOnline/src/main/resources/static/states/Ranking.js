@@ -1,6 +1,7 @@
 
 LoveLetterOnline.Ranking = function(game){
 	var jugsRanking = [];
+	var jugsRankingOrd = [];
 	var texto;
 	var that;
 	
@@ -24,9 +25,9 @@ LoveLetterOnline.Ranking.prototype = {
 			//Cuando los jugadores se han cargado desde el servidor
 			for(var i=0; i<jugadores.length; i++){
 				jugsRanking.push(jugadores[i].partidasGanadas);
-				
 			}
 			
+			that.ordenarJugadores(jugadores);
 			that.mostrarJugadores();
 			
 		});
@@ -38,6 +39,23 @@ LoveLetterOnline.Ranking.prototype = {
 	volver: function(){
 		this.state.start('Menu');
 	},
+	
+	ordenarJugadores: function(jugadores){
+		
+		jugsRankingOrd = jugadores;
+		
+		var temp;
+		for(var i=0; i<jugsRankingOrd.length; i++){
+			for(var j=0; j<jugsRankingOrd.length; j++){
+				if(jugsRankingOrd[j].partidasGanadas>jugsRankingOrd[j+1].partidasGanadas){
+					temp = jugsRankingOrd[j];
+					jugsRankingOrd[j] = jugsRankingOrd[j+1];
+					jugsRankingOrd[j+1] = temp;
+				}
+			}
+		}
+	}
+	
 	
 	loadJugadores: function(callback){
 		$.ajax({
