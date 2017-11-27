@@ -22,7 +22,7 @@ LoveLetterOnline.Menu.prototype = {
 	},
 	jugar: function(){
 		this.state.start('Lobby');
-		//this.state.start('Jugar');
+		
 		
 	},
 	ranking: function(){

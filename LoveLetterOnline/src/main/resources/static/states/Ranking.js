@@ -1,13 +1,12 @@
 
 LoveLetterOnline.Ranking = function(game){
-	var jugsRanking = [];
+	
 	var jugsRankingOrd = [];
 	var texto;
 	var that;
 	
 };
 
-var jugsRanking = [];
 var texto;
 var juego;
 
@@ -23,9 +22,9 @@ LoveLetterOnline.Ranking.prototype = {
 			that.mostrarTexto();
 			
 			//Cuando los jugadores se han cargado desde el servidor
-			for(var i=0; i<jugadores.length; i++){
+			/*for(var i=0; i<jugadores.length; i++){
 				jugsRanking.push(jugadores[i].partidasGanadas);
-			}
+			}*/
 			
 			that.ordenarJugadores(jugadores);
 			that.mostrarJugadores();
@@ -47,14 +46,14 @@ LoveLetterOnline.Ranking.prototype = {
 		var temp;
 		for(var i=0; i<jugsRankingOrd.length; i++){
 			for(var j=0; j<jugsRankingOrd.length; j++){
-				if(jugsRankingOrd[j].partidasGanadas>jugsRankingOrd[j+1].partidasGanadas){
+				if(jugsRankingOrd[j+1]!==undefined && (jugsRankingOrd[j].partidasGanadas<jugsRankingOrd[j+1].partidasGanadas)){
 					temp = jugsRankingOrd[j];
 					jugsRankingOrd[j] = jugsRankingOrd[j+1];
 					jugsRankingOrd[j+1] = temp;
 				}
 			}
 		}
-	}
+	},
 	
 	
 	loadJugadores: function(callback){
@@ -69,10 +68,11 @@ LoveLetterOnline.Ranking.prototype = {
 	mostrarJugadores: function(){
 		var textoNombre;
 		for(var i=0; i<5; i++){
-			if(jugsRanking[i]!==undefined){
-				textoNombre = jugsRanking[i];
+			if(jugsRankingOrd[i]!==undefined){
+				textoNombre = jugsRankingOrd[i].nombre+' con '+ jugsRankingOrd[i].partidasGanadas+' punto/s.';
 			}else textoNombre = '-';
-			that.add.text(that.world.centerX, (that.world.centerY-200)+50*i, (i+1) + '. '+textoNombre, {fill: "#ffffff"});
+			var tmp = that.add.text(that.world.centerX, (that.world.centerY-200)+50*i, (i+1) + '. '+textoNombre, {fill: "#ffffff"});
+			tmp.anchor.x = 0.5;
 		}
 	},
 	
