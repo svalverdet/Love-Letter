@@ -3,7 +3,6 @@ package LoveLetter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.http.HttpStatus;
@@ -38,11 +37,7 @@ public class JugadoresController {
 
 		long id = lastId.incrementAndGet();
 		jugador.setId(id);
-		
-		Random rand = new Random();
-		int  n = rand.nextInt(8);
-		jugador.setPartidasGanadas(n);
-		
+		jugador.setPartidasGanadas(0);
 		jugadores.put(id, jugador);
 
 		return jugador;

@@ -66,14 +66,31 @@ LoveLetterOnline.Ranking.prototype = {
 	},
 	
 	mostrarJugadores: function(){
-		var textoNombre;
+		var textoNombre, tmp;
 		for(var i=0; i<5; i++){
 			if(jugsRankingOrd[i]!==undefined){
 				textoNombre = jugsRankingOrd[i].nombre+' con '+ jugsRankingOrd[i].partidasGanadas+' punto/s.';
 			}else textoNombre = '-';
-			var tmp = that.add.text(that.world.centerX, (that.world.centerY-200)+50*i, (i+1) + '. '+textoNombre, {fill: "#ffffff"});
+			tmp = that.add.text(that.world.centerX, (that.world.centerY-200)+50*i, (i+1) + '. '+textoNombre, {fill: "#ffffff"});
 			tmp.anchor.x = 0.5;
 		}
+		
+		that.obtenerJugador(function(jugador){
+			tmp = that.add.text(that.world.centerX, (that.world.centerY-200)+300, 'Tu puntuación: '+jugador.partidasGanadas, {fill: "#ffffff"});
+			tmp.anchor.x = 0.5;
+		}).done(function (jugador) {
+			console.log("Jugador: " + JSON.stringify(jugador));
+		});
+		
+	},
+	
+	obtenerJugador: function(callback){
+		$.ajax({
+			url: 'http://localhost:8080/jugadores/' + game.id_jugador
+		}).done(function (jugador) {
+			console.log('Jugador loaded: ' + JSON.stringify(jugador));
+			callback(jugador);
+		});
 	},
 	
 	mostrarTexto: function(){

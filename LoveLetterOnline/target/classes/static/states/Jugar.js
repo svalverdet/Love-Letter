@@ -16,7 +16,7 @@ LoveLetterOnline.Jugar = function(game){
 	var turnos = 0; //Aumenta cada vez que juega un jugador
 	var numeroJugadores = 3; //Número entre 2 y 4.
 	var turnoJugador; //A qué jugador le toca jugar
-	var corazonesParaGanar = 2;
+	var corazonesParaGanar = 1;
 	var ganadorJuego;
 
 	var cartasManoJugadores = []; //Las cartas que tienen los jugadores en mano
@@ -191,10 +191,10 @@ LoveLetterOnline.Jugar.prototype = {
 	create: function(){
 		
 		//Cargar como fondo
-		game.stage.backgroundColor = "#c73a3a";
+		game.stage.backgroundColor = "#000000";
 		game.add.tileSprite(0, 0, gameOptions.gameWidth, gameOptions.gameHeight, 'menu');
 		//Centrar el juego en la pantalla
-		this.game.scale.pageAlignHorizontally = true;this.game.scale.pageAlignVertically = true;this.game.scale.refresh();
+		//this.game.scale.pageAlignHorizontally = true;this.game.scale.pageAlignVertically = true;this.game.scale.refresh();
 
 		textoJugar = game.add.text(gameOptions.gameWidth-220, 100,"Jugar", { font: "bold 72px Waverly", fill:"#000000"});
 		textoInstrucciones = game.add.text(gameOptions.gameWidth-220, 190,"Instrucciones", { font: "bold 36px Waverly", fill:"#000000"});
@@ -247,10 +247,11 @@ LoveLetterOnline.Jugar.prototype = {
 		
 		//variables globales
 		indiceMazo = 0; //Para ir sacando las cartas del mazo, recorre todas las cartas
+		//Phaser.ArrayUtils.shuffle(mazo);
 		turnos = 0; //Aumenta cada vez que juega un jugador
 		numeroJugadores = 3; //Número entre 2 y 4.
 		//turnoJugador; //A qué jugador le toca jugar
-		corazonesParaGanar = 2;
+		corazonesParaGanar = 1;
 		
 		cartasManoJugadores = []; //Las cartas que tienen los jugadores en mano
 		cartasMesaJugadores = []; //Las cartas que han ido descartando los jugadores
@@ -303,6 +304,7 @@ LoveLetterOnline.Jugar.prototype = {
 		for(var j=0; j<3; j++){
 			botonesElegirJugadores[j] = game.add.button((item.x-140)+j*140, item.y, 'boton', function(btn){
 				numeroJugadores = botonesElegirJugadores.indexOf(btn)+2;
+				jugadoresVivos = numeroJugadores;
 				delete botonesElegirJugadores;
 				this.createGame();
 			}, this, 1, 0);
@@ -866,20 +868,47 @@ LoveLetterOnline.Jugar.prototype = {
 			textoEventosPartida.push("Parece que alguien ha conseguido todos los corazones.");
 			textoEventosPartida.shift();
 			textoEventosPartida.push("¡El ganador del juego es el jugador "+(ganadorJuego+1)+"!");
+			
+			//Si ha ganado la persona que juega, esto es, el jugador 1 (del indice 0)
+			//Se actualizan las puntuaciones del servidor
+			if(ganadorJuego === 0){
+				LoveLetterOnline.Jugar.prototype.obtenerJugador(function(jugador){
+					jugador.partidasGanadas++;
+					
+					$.ajax({
+						method: "PUT",
+						url: 'http://localhost:8080/jugadores/' + jugador.id,
+						data: JSON.stringify(jugador),
+						processData: false,
+						headers: {
+							"Content-Type": "application/json"
+						}
+					}).done(function (jugador) {
+						console.log("Jugador updated: " + JSON.stringify(jugador));
+					});
+					
+				});
+			}
+			
+			//Se vuelve al menu
+			game.time.events.add(1000, function(){
+				game.state.start('Menu');
+			});
+			
 		}
 	}, 
 	
+	obtenerJugador: function(callback){
+		$.ajax({
+			url: 'http://localhost:8080/jugadores/' + game.id_jugador
+		}).done(function (jugador) {
+			console.log('Jugador loaded: ' + JSON.stringify(jugador));
+			callback(jugador);
+		});
+	},
+	
 	finJuego: function(){
-		//Si algún jugador ha conseguido todos los corazones, es el ganador definitivo
-		for(var idx=0; idx<numeroJugadores; idx++){
-			if(cartaDescarteJugadores[idx].corazones>corazonesParaGanar){
-				ganadorJuego = idx;
-				return true;
-			}
-		}
-		textoEventosPartida.shift();
-		textoEventosPartida.push("Se pasará a la siguiente ronda en 5 segundos.");
-
+		
 		//Se pintan los corazones de cada jugador
 		for(var i=0; i<numeroJugadores; i++) {
 			for(var j=0; j<cartaDescarteJugadores[i].corazones;j++){
@@ -892,6 +921,16 @@ LoveLetterOnline.Jugar.prototype = {
 				cor.scale.setTo(0.8,0.8);
 			}
 		}
+		
+		//Si algún jugador ha conseguido todos los corazones, es el ganador definitivo
+		for(var idx=0; idx<numeroJugadores; idx++){
+			if(cartaDescarteJugadores[idx].corazones>=corazonesParaGanar){
+				ganadorJuego = idx;
+				return true;
+			}
+		}
+		textoEventosPartida.shift();
+		textoEventosPartida.push("Se pasará a la siguiente ronda en 5 segundos.");
 
 		game.time.events.add(5000, LoveLetterOnline.Jugar.prototype.resetear);
 	}, 
@@ -1361,14 +1400,13 @@ LoveLetterOnline.Jugar.prototype = {
 	}, 
 	
 	resetear: function(){
-		    //variables globales
+		//variables globales
 		indiceMazo = 0; //Para ir sacando las cartas del mazo, recorre todas las cartas
 		turnos = 0; //Aumenta cada vez que juega un jugador
 
 		//delete cartasManoJugadores; //Las cartas que tienen los jugadores en mano
 		//delete cartasMesaJugadores; //Las cartas que han ido descartando los jugadores
 		//delete cartaDescarteJugadores; //Objeto para interactuar con los demás jugadores y mostrar la última carta descartada
-		
 		cartasManoJugadores = [];
 		cartasMesaJugadores = [];
 		
@@ -1395,6 +1433,7 @@ LoveLetterOnline.Jugar.prototype = {
 			cartaDescarteJugadores[i].vivo = true;
 			cartaDescarteJugadores[i].protegido = false;
 		 }
+
 		 
 	}
 }
