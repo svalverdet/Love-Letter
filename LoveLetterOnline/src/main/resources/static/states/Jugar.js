@@ -194,7 +194,7 @@ LoveLetterOnline.Jugar.prototype = {
 		game.stage.backgroundColor = "#c73a3a";
 		game.add.tileSprite(0, 0, gameOptions.gameWidth, gameOptions.gameHeight, 'menu');
 		//Centrar el juego en la pantalla
-		//this.game.scale.pageAlignHorizontally = true;this.game.scale.pageAlignVertically = true;this.game.scale.refresh();
+		this.game.scale.pageAlignHorizontally = true;this.game.scale.pageAlignVertically = true;this.game.scale.refresh();
 
 		textoJugar = game.add.text(gameOptions.gameWidth-220, 100,"Jugar", { font: "bold 72px Waverly", fill:"#000000"});
 		textoInstrucciones = game.add.text(gameOptions.gameWidth-220, 190,"Instrucciones", { font: "bold 36px Waverly", fill:"#000000"});
@@ -1365,10 +1365,13 @@ LoveLetterOnline.Jugar.prototype = {
 		indiceMazo = 0; //Para ir sacando las cartas del mazo, recorre todas las cartas
 		turnos = 0; //Aumenta cada vez que juega un jugador
 
-		delete cartasManoJugadores; //Las cartas que tienen los jugadores en mano
-		delete cartasMesaJugadores; //Las cartas que han ido descartando los jugadores
+		//delete cartasManoJugadores; //Las cartas que tienen los jugadores en mano
+		//delete cartasMesaJugadores; //Las cartas que han ido descartando los jugadores
 		//delete cartaDescarteJugadores; //Objeto para interactuar con los demás jugadores y mostrar la última carta descartada
-
+		
+		cartasManoJugadores = [];
+		cartasMesaJugadores = [];
+		
 		jugadorElegido = false; //Para los efectos de las cartas
 		canPlay = true; //Determina si es el turno del siguiente jugador
 		finReparto = false; //Utilizada para hacer el reparto inicial automático.
@@ -1392,7 +1395,6 @@ LoveLetterOnline.Jugar.prototype = {
 			cartaDescarteJugadores[i].vivo = true;
 			cartaDescarteJugadores[i].protegido = false;
 		 }
-
 		 
 	}
 }
