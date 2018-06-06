@@ -1,5 +1,4 @@
 LoveLetterOnline.Ranking = function(game){
-	var jugsRankingOrd = [];
 	var texto;
 	var that;
 	var MAX_HALL_OF_FAME_PLAYERS;
@@ -20,10 +19,6 @@ LoveLetterOnline.Ranking.prototype = {
 			that.mostrarJugadores(jugadores);
 			that.mostrarPtsJugActual();
 		});	
-	},
-	
-	volver: function(){
-		this.state.start('Menu');
 	},
 	
 	loadJugadoresOrd: function(callback){
@@ -70,6 +65,6 @@ LoveLetterOnline.Ranking.prototype = {
 		texto = that.add.text(that.world.centerX, that.world.centerY+150,'Volver',{fill: "#ffffff"});
 		texto.anchor.x = 0.5;
 		texto.inputEnabled = true;
-		texto.events.onInputDown.add(that.volver, this);
+		texto.events.onInputDown.add(function(){game.goTo('Menu')}, this);
 	}
 };

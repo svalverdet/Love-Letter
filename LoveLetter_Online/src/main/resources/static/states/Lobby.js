@@ -22,22 +22,16 @@ LoveLetterOnline.Lobby.prototype = {
 			jugActual = jugador;
 		});
 		
-		//$(document).ready(function(){})
-		 this.loadPartidas(function(partidas){
+		this.loadPartidas(function(partidas){
 			
 			that.mostrarTexto();
 			
-			//Cuando las partidas se han cargado desde el servidor
 			for(var i=0; i<partidas.length; i++){
 				partidasEnJuego.push(partidas[i]);
 			}
 			
 			that.mostrarPartidas();
 		});
-	},
-	
-	volver: function(){
-		this.state.start('Menu');
 	},
 	
 	loadPartidas: function(callback){
@@ -52,6 +46,7 @@ LoveLetterOnline.Lobby.prototype = {
 	
 	mostrarPartidas: function(){
 		var offset, p_i;
+		//Máximo de 5 partidas
 		for(var i=0; i<5; i++){
 			p_i = partidasEnJuego[i];
 			offset = texto_partidasEnJuego.length;
@@ -61,6 +56,7 @@ LoveLetterOnline.Lobby.prototype = {
 					id: p_i.id
 				};
 				linea.texto.inputEnabled = true;
+				//Al clicar en una partida, se ejecuta el código para unirse a esa partida
 				linea.texto.events.onInputDown.add(that.unirsePartida, this, 0, linea);
 				texto_partidasEnJuego.push(linea);
 			}
@@ -91,12 +87,14 @@ LoveLetterOnline.Lobby.prototype = {
 			var jugs = partida_tmp.jugsPartida;
 			var canJoin = true;
 			
+			//Se comprueba si el jugador ya está en la partida
 			for(var i=0; i<jugs.length; i++){
 				if(game.id_jugador == jugs[i].id){
 					canJoin=false;
 				}
 			}
 			
+			//Si el jugador no está dentro de la partida
 			if(canJoin){
 				if(partida_tmp.numJug == partida_tmp.numJugMax){
 					alert("Esta partida ya está llena.");
@@ -105,29 +103,28 @@ LoveLetterOnline.Lobby.prototype = {
 						partida_tmp.jugsPartida.push(jugActual);
 						partida_tmp.numJug++;
 						that.putPartida(partida_tmp);
-						game.state.start('Jugar');
+						game.goTo('Jugar'); 		//						 -> mandando mensaje ws el ultimo que se una
 					//Cuando la partida aun no esta a punto de llenarse
 					}else{
+						
 						var msg = {
-								name: Pepa
+								name: 'Pepa'
 						}
-						connection.send(JSON.stringify(msg));
+						game.connection.send(JSON.stringify(msg));
+						
 						partida_tmp.jugsPartida.push(jugActual);
 						partida_tmp.numJug++;
 						that.putPartida(partida_tmp);
-						game.state.start('Lobby');
+						game.state.start('EnPartida', true, false, partida_tmp);
 					}
 				}
 			}else{
 				alert("No puedes unirte porque ya estás unido. Sería demasiado meta.");
 			}
 			
-			game.state.start('EnPartida', true, false, partida);
+			//game.state.start('EnPartida', true, false, partida);
 			
 		}, id_tmp);
-		
-		
-		
 	},
 	
 	obtenerPartida: function(callback, id_tmp){
@@ -146,8 +143,6 @@ LoveLetterOnline.Lobby.prototype = {
 			console.log('Jugador loaded: ' + JSON.stringify(jugador));
 			callback(jugador);
 		});
-		
-		
 	},
 	
 	postPartida: function(){
@@ -167,23 +162,24 @@ LoveLetterOnline.Lobby.prototype = {
 	addPartida: function(){
 			
 		var nomPartida = prompt("Introduce aquí el nombre de la partida", "Default_Game");
-		var numJugs = prompt("Introduce aquí el número de jugadores", "4");
+		var numJugs = prompt("Introduce aquí el número de jugadores [2,4]", "3");
 			
 		partida = {
-					nomPartida: nomPartida,
-					numJugMax: numJugs,
-					numJug: 1,
-					jugsPartida: [jugActual]
+			nomPartida: nomPartida,
+			numJugMax: numJugs,
+			numJug: 1,
+			jugsPartida: [jugActual]
 		};
 			
 		that.postPartida();
 		game.state.start('EnPartida',true, false, partida);
 		
 	},
-
+	/*
 	refrescarPartidas: function(){
 		game.state.start('Lobby');
 	},
+	*/
 	
 	mostrarTexto: function(){
 		texto = that.add.text(that.world.centerX, that.world.centerY-250,'L O V E   L E T T E R   O N L I N E',{fill: "#ffffff"});
@@ -192,7 +188,7 @@ LoveLetterOnline.Lobby.prototype = {
 		texto = that.add.text(that.world.centerX, that.world.centerY+150,'Volver',{fill: "#ffffff"});
 		texto.anchor.x = 0.5;
 		texto.inputEnabled = true;
-		texto.events.onInputDown.add(that.volver, this);
+		texto.events.onInputDown.add(function(){game.goTo('Menu')}, this);
 		
 		texto_AddPartida = that.add.text(that.world.centerX-150, that.world.centerY-200,'Crear partida',{fill: "#ffffff"});
 		texto_AddPartida.anchor.x = 0.5;
@@ -203,6 +199,6 @@ LoveLetterOnline.Lobby.prototype = {
 		texto_refrescar = that.add.text(that.world.centerX+150, that.world.centerY-200,'Actualizar',{fill: "#ffffff"});
 		texto_refrescar.anchor.x = 0.5;
 		texto_refrescar.inputEnabled = true;
-		texto_refrescar.events.onInputDown.add(that.refrescarPartidas, this);
+		texto_refrescar.events.onInputDown.add(function(){game.goTo('Lobby')}, this);
 	}
 };

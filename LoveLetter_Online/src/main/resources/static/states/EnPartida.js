@@ -7,8 +7,6 @@ LoveLetterOnline.EnPartida = function(game){
 	
 };
 
-
-
 LoveLetterOnline.EnPartida.prototype = {
 	
 	init: function(partida){
@@ -43,6 +41,7 @@ LoveLetterOnline.EnPartida.prototype = {
 		
 	},
 	
+	//Se elimina al jugador de la partida
 	volver: function(){
 		this.state.start('Lobby');
 	}

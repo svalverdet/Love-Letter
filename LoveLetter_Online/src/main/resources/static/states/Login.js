@@ -14,15 +14,15 @@ LoveLetterOnline.Login.prototype = {
 		texto = this.add.text(this.world.centerX, this.world.centerY,'Entrar',{fill: "#ffffff"});
 		texto.anchor.x = 0.5;
 		texto.inputEnabled = true;
+		//Al darle clic a entrar se comprueba si ya existe el jugador
 		texto.events.onInputDown.add(this.entrar, this);
 		
 		//Se inserta el nombre del jugador.
-		var nomJugador = prompt("Introduce aquí tu nombre", "Guest");
+		let nomJugador = prompt("Introduce aquí tu nombre", "Guest");
 		jugador = {
             nombre: nomJugador
         };
 	},
-	
 	
 	//Hacer el login
 	entrar: function(){
@@ -52,7 +52,7 @@ LoveLetterOnline.Login.prototype = {
 			console.log("Mensaje enviado: "+msg);			
 			*/
 			
-			game.state.start('Menu');
+			game.goTo('Menu');
 			
 		});
 		
@@ -69,6 +69,7 @@ LoveLetterOnline.Login.prototype = {
 				"Content-Type": "application/json"
 			}
 		}).done(function (jugador) {
+			//Una vez ha creado el jugador, asigna el id al juego
 			console.log("Jugador created: " + JSON.stringify(jugador));
 			game.id_jugador = jugador.id;
 		});
