@@ -5,9 +5,7 @@ LoveLetterOnline.Lobby = function(game){
 	var texto_refrescar;
 	var that;
 	var texto_partidasEnJuego = [];
-	var partidasEnJuego = [];
 	var jugActual;
-	var partida;
 	
 };
 
@@ -16,41 +14,45 @@ LoveLetterOnline.Lobby.prototype = {
 	create: function(){
 		that = this;
 		texto_partidasEnJuego = [];
-		partidasEnJuego = [];
 		
 		this.obtenerJugador(function(jugador){
 			jugActual = jugador;
 		});
 		
 		this.loadPartidas(function(partidas){
-			
 			that.mostrarTexto();
-			
-			for(var i=0; i<partidas.length; i++){
-				partidasEnJuego.push(partidas[i]);
+			that.mostrarPartidas(partidas);
+		});
+	},
+	
+	addPartida: function(){
+		this.loadPartidas(function(partidas){
+			if (partidas.length<5){
+				var nomPartida = prompt("Introduce aquí el nombre de la partida", "Default_Game");
+				var numJugs = prompt("Introduce aquí el número de jugadores [2,4]", "3");
+					
+				var partida = {
+					nomPartida: nomPartida,
+					numJugMax: numJugs,
+					numJug: 1,
+					jugsPartida: [jugActual]
+				};
+					
+				that.postPartida(partida);
+				game.state.start('EnPartida',true, false, partida);
+			}else{
+				alert("No se pueden crear más partidas.");
 			}
-			
-			that.mostrarPartidas();
 		});
 	},
 	
-	loadPartidas: function(callback){
-		$.ajax({
-			url: 'http://localhost:8080/partidas'
-		}).done(function (partidas) {
-			//console.log('Partidas loaded: ' + JSON.stringify(partidas));
-			callback(partidas);
-		});
-		
-	},
-	
-	mostrarPartidas: function(){
+	mostrarPartidas: function(partidas){
 		var offset, p_i;
 		//Máximo de 5 partidas
-		for(var i=0; i<5; i++){
-			p_i = partidasEnJuego[i];
+		for(var i=0; i<partidas.length; i++){
+			p_i = partidas[i];
 			offset = texto_partidasEnJuego.length;
-			if(p_i!==undefined){
+			if(p_i!==undefined){												// INNECESARIO??
 				var linea = {
 					texto: that.add.text(that.world.centerX-150, (that.world.centerY-150)+50*offset, p_i.nomPartida+': para '+p_i.numJugMax+' jugadores. ('+p_i.numJug+'/'+p_i.numJugMax+')',{fill: "#ffffff"}),
 					id: p_i.id
@@ -62,20 +64,6 @@ LoveLetterOnline.Lobby.prototype = {
 			}
 		}
 		
-	},
-	
-	putPartida: function(partida_tmp){
-		$.ajax({
-			method: "PUT",
-			url: 'http://localhost:8080/partidas/' + partida_tmp.id,
-			data: JSON.stringify(partida_tmp),
-			processData: false,
-			headers: {
-				"Content-Type": "application/json"
-			}
-		}).done(function (partida_tmp) {
-			console.log("Partida updated: " + JSON.stringify(partida_tmp));
-		});
 	},
 	
 	unirsePartida: function(a,b, linea){
@@ -99,14 +87,14 @@ LoveLetterOnline.Lobby.prototype = {
 				if(partida_tmp.numJug == partida_tmp.numJugMax){
 					alert("Esta partida ya está llena.");
 				}else{
-					if(partida_tmp.numJug == partida_tmp.numJugMax-1){
+					if(partida_tmp.numJug == partida_tmp.numJugMax-1){			//quitar cosas repetidas (3 lineas)
 						partida_tmp.jugsPartida.push(jugActual);
 						partida_tmp.numJug++;
 						that.putPartida(partida_tmp);
 						game.goTo('Jugar'); 		//						 -> mandando mensaje ws el ultimo que se una
 					//Cuando la partida aun no esta a punto de llenarse
 					}else{
-						
+																			// -> todos los que se unan mandan mensaje y avisan
 						var msg = {
 								name: 'Pepa'
 						}
@@ -119,12 +107,21 @@ LoveLetterOnline.Lobby.prototype = {
 					}
 				}
 			}else{
-				alert("No puedes unirte porque ya estás unido. Sería demasiado meta.");
+				alert("No puedes unirte porque ya estás unido. (Sería demasiado meta.)");
 			}
-			
-			//game.state.start('EnPartida', true, false, partida);
-			
 		}, id_tmp);
+	},
+	
+	
+	//REST
+	loadPartidas: function(callback){
+		$.ajax({
+			url: 'http://localhost:8080/partidas'
+		}).done(function (partidas) {
+			//console.log('Partidas loaded: ' + JSON.stringify(partidas));
+			callback(partidas);
+		});
+		
 	},
 	
 	obtenerPartida: function(callback, id_tmp){
@@ -145,7 +142,7 @@ LoveLetterOnline.Lobby.prototype = {
 		});
 	},
 	
-	postPartida: function(){
+	postPartida: function(partida){
 		$.ajax({
 			method: "POST",
 			url: 'http://localhost:8080/partidas',
@@ -159,28 +156,26 @@ LoveLetterOnline.Lobby.prototype = {
 		});
 	},
 	
-	addPartida: function(){
-			
-		var nomPartida = prompt("Introduce aquí el nombre de la partida", "Default_Game");
-		var numJugs = prompt("Introduce aquí el número de jugadores [2,4]", "3");
-			
-		partida = {
-			nomPartida: nomPartida,
-			numJugMax: numJugs,
-			numJug: 1,
-			jugsPartida: [jugActual]
-		};
-			
-		that.postPartida();
-		game.state.start('EnPartida',true, false, partida);
-		
+	putPartida: function(partida_tmp){
+		$.ajax({
+			method: "PUT",
+			url: 'http://localhost:8080/partidas/' + partida_tmp.id,
+			data: JSON.stringify(partida_tmp),
+			processData: false,
+			headers: {
+				"Content-Type": "application/json"
+			}
+		}).done(function (partida_tmp) {
+			console.log("Partida updated: " + JSON.stringify(partida_tmp));
+		});
 	},
-	/*
-	refrescarPartidas: function(){
-		game.state.start('Lobby');
-	},
-	*/
 	
+	deletePartida: function(partida_tmp){
+		
+	}
+	
+	
+	//MOSTRAR EL TEXTO INICIAL
 	mostrarTexto: function(){
 		texto = that.add.text(that.world.centerX, that.world.centerY-250,'L O V E   L E T T E R   O N L I N E',{fill: "#ffffff"});
 		texto.anchor.x = 0.5;

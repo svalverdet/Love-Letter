@@ -37,6 +37,7 @@
 	game.connection.onclose = function() {
 		console.log("Closing socket");
 	}
+	game.
 		
 
 //})

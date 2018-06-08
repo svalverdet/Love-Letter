@@ -33,6 +33,7 @@ LoveLetterOnline.EnPartida.prototype = {
 		//WEBSOCKETS
 		
 		game.connection.onmessage = function(msg) {
+			var msg = JSON.parse(event.data);
 			console.log("WS message en la partida: " + msg.data);
 			/*var message = JSON.parse(msg.data)
 			$('#chat').val($('#chat').val() + "\n" + message.name + ": " + message.message);*/
@@ -43,6 +44,9 @@ LoveLetterOnline.EnPartida.prototype = {
 	
 	//Se elimina al jugador de la partida
 	volver: function(){
+		
+		//Eliminar al jugaodr
+		
 		this.state.start('Lobby');
 	}
 		
