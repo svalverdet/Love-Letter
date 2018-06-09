@@ -17,13 +17,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class PartidasController {
 	
 	@Autowired
-	private PartidasService partidasService;
+	//private PartidasService partidasService;
 	
 	
 	//GET
 	@RequestMapping(method = RequestMethod.GET)
 	public Collection<Partida> partidas() {
-		return partidasService.getPartidas();//te devuelve los valores de cada partida
+		return PartidasService.getPartidas();//te devuelve los valores de cada partida
 	}
 	
 	
@@ -31,7 +31,7 @@ public class PartidasController {
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public Partida nuevaPartida(@RequestBody Partida partida) {
-		return partidasService.postPartida(partida);
+		return PartidasService.postPartida(partida);
 	}
 	
 	
@@ -39,7 +39,7 @@ public class PartidasController {
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	public ResponseEntity<Partida> getPartida(@PathVariable long id) {
 
-		Partida partida = partidasService.getPartida(id);//encuentra a la partida
+		Partida partida = PartidasService.getPartida(id);//encuentra a la partida
 
 		if (partida != null) {//si existe
 			return new ResponseEntity<>(partida, HttpStatus.OK);//devuelve sus datos
@@ -53,7 +53,7 @@ public class PartidasController {
 	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
 	public ResponseEntity<Partida> actualizaPartida(@PathVariable long id, @RequestBody Partida partidaActualizada) {
 
-		Partida partida = partidasService.actualizaPartida(id, partidaActualizada);
+		Partida partida = PartidasService.actualizaPartida(id, partidaActualizada);
 
 		if (partida != null) {
 			return new ResponseEntity<>(partidaActualizada, HttpStatus.OK);
@@ -68,7 +68,7 @@ public class PartidasController {
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 	public ResponseEntity<Partida> borraPartida(@PathVariable long id) {
 
-		Partida partida = partidasService.deletePartida(id);
+		Partida partida = PartidasService.deletePartida(id);
 
 		if (partida != null) {
 			return new ResponseEntity<>(partida, HttpStatus.OK);

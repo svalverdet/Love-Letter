@@ -92,9 +92,9 @@ LoveLetterOnline.Lobby.prototype = {
 					partida_tmp.jugsPartida.push(jugActual);
 					partida_tmp.numJug++;
 					that.putPartida(partida_tmp);
-					if(partida_tmp.numJug == partida_tmp.numJugMax){			//quitar cosas repetidas (3 lineas)
+					if(partida_tmp.numJug == partida_tmp.numJugMax){
 						game.sendMessage(WS_actions.outgoing.START_GAME);
-						game.goTo('Jugar'); 		//						 -> mandando mensaje ws el ultimo que se una
+						game.goTo('Jugar'); 		
 					//Cuando la partida aun no esta a punto de llenarse
 					}else{
 						game.sendMessage(WS_actions.outgoing.JOIN_GAME, { name: jugActual.nombre });

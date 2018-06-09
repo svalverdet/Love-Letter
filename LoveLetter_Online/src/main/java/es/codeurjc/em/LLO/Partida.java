@@ -53,11 +53,13 @@ public class Partida {
 	public void setJugsPartida(List<Jugador> jugsPartida) {
 		this.jugsPartida = jugsPartida;
 	}
-	
-	
+
 	@Override
 	public String toString() {
-		return "Partida [id=" + id + ",nombre=" + nomPartida + ", numero Jugadores=" + numJug + ",numero Jugadores máximo=" +numJugMax+"]";
+		return "Partida [id=" + id + ", nomPartida=" + nomPartida + ", numJug=" + numJug + ", numJugMax=" + numJugMax
+				+ ", jugsPartida=" + jugsPartida + "]";
 	}
+	
+	
 	
 }

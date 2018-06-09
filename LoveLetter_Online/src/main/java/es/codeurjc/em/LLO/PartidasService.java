@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class PartidasService {
-	private Map<Long, Partida> partidas = new HashMap<Long, Partida>();
-	private AtomicLong lastId = new AtomicLong();
+	private static Map<Long, Partida> partidas = new HashMap<Long, Partida>();
+	private static AtomicLong lastId = new AtomicLong();
 	
 	
 	public PartidasService() {
@@ -22,12 +22,12 @@ public class PartidasService {
 	
 	
 	//GET
-	public Collection<Partida> getPartidas(){
+	public static Collection<Partida> getPartidas(){
 		return partidas.values();
 	}
 	
 	//POST
-	public Partida postPartida(Partida partida) {
+	public static Partida postPartida(Partida partida) {
 
 		long id = lastId.incrementAndGet();//saca cual sería el siguiente id que habría que ponerle
 		partida.setId(id);//le da el id a la partida nueva
@@ -37,19 +37,19 @@ public class PartidasService {
 	}
 
 	//GET {id}
-	public Partida getPartida(Long id) {
+	public static Partida getPartida(Long id) {
 		return partidas.get(id);
 	}
 	
 	//PUT
-	public Partida actualizaPartida(Long id, Partida partidaAct) {
+	public static Partida actualizaPartida(Long id, Partida partidaAct) {
 		partidaAct.setId(id);
 		partidas.put(id, partidaAct);
 		return partidaAct;
 	}
 	
 	//DELETE
-	public Partida deletePartida(Long id) {
+	public static Partida deletePartida(Long id) {
 		return partidas.remove(id);
 	}
 	

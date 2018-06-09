@@ -44,6 +44,7 @@ LoveLetterOnline.EnPartida.prototype = {
 				case WS_actions.incoming.JOIN_GAME:
 					console.log("Se ha unido: " + packet.data.name);
 					that.obtenerPartida(function(partida){
+						//Se lo tiene que mandar sólo a los que estén con él en la partida
 						game.state.start('EnPartida', true, false, partida);
 					},partida_actual.id);
 					break;
@@ -64,9 +65,6 @@ LoveLetterOnline.EnPartida.prototype = {
 					break;
 			}
 		}
-		
-		
-		
 	},
 	
 	//Se elimina al jugador de la partida
@@ -96,12 +94,7 @@ LoveLetterOnline.EnPartida.prototype = {
 						game.sendMessage(WS_actions.outgoing.LEAVE_GAME, { name: jugador.nombre });
 						game.goTo('Lobby');
 					}
-					
-					
-					
 				}
-				
-				
 			}, partida_actual.id);
 		});
 	},
