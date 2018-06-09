@@ -38,8 +38,10 @@ LoveLetterOnline.Lobby.prototype = {
 					jugsPartida: [jugActual]
 				};
 					
-				that.postPartida(partida);
-				game.state.start('EnPartida',true, false, partida);
+				that.postPartida(function(partidaAct){
+					game.state.start('EnPartida',true, false, partidaAct);
+				}, partida);
+				
 			}else{
 				alert("No se pueden crear más partidas.");
 			}
@@ -87,22 +89,15 @@ LoveLetterOnline.Lobby.prototype = {
 				if(partida_tmp.numJug == partida_tmp.numJugMax){
 					alert("Esta partida ya está llena.");
 				}else{
-					if(partida_tmp.numJug == partida_tmp.numJugMax-1){			//quitar cosas repetidas (3 lineas)
-						partida_tmp.jugsPartida.push(jugActual);
-						partida_tmp.numJug++;
-						that.putPartida(partida_tmp);
+					partida_tmp.jugsPartida.push(jugActual);
+					partida_tmp.numJug++;
+					that.putPartida(partida_tmp);
+					if(partida_tmp.numJug == partida_tmp.numJugMax){			//quitar cosas repetidas (3 lineas)
+						game.sendMessage(WS_actions.outgoing.START_GAME);
 						game.goTo('Jugar'); 		//						 -> mandando mensaje ws el ultimo que se una
 					//Cuando la partida aun no esta a punto de llenarse
 					}else{
-																			// -> todos los que se unan mandan mensaje y avisan
-						var msg = {
-								name: 'Pepa'
-						}
-						game.connection.send(JSON.stringify(msg));
-						
-						partida_tmp.jugsPartida.push(jugActual);
-						partida_tmp.numJug++;
-						that.putPartida(partida_tmp);
+						game.sendMessage(WS_actions.outgoing.JOIN_GAME, { name: jugActual.nombre });
 						game.state.start('EnPartida', true, false, partida_tmp);
 					}
 				}
@@ -142,7 +137,7 @@ LoveLetterOnline.Lobby.prototype = {
 		});
 	},
 	
-	postPartida: function(partida){
+	postPartida: function(callback, partida){
 		$.ajax({
 			method: "POST",
 			url: 'http://localhost:8080/partidas',
@@ -151,8 +146,9 @@ LoveLetterOnline.Lobby.prototype = {
 			headers: {
 				"Content-Type": "application/json"
 			}
-		}).done(function (partida) {
-			console.log("Partida created: " + JSON.stringify(partida));
+		}).done(function (partidaAct) {
+			console.log("Partida created: " + JSON.stringify(partidaAct));
+			callback(partidaAct);
 		});
 	},
 	
@@ -170,9 +166,6 @@ LoveLetterOnline.Lobby.prototype = {
 		});
 	},
 	
-	deletePartida: function(partida_tmp){
-		
-	}
 	
 	
 	//MOSTRAR EL TEXTO INICIAL

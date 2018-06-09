@@ -17,7 +17,6 @@ public class GameHandler extends TextWebSocketHandler {
 
 	private Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
 	private ObjectMapper mapper = new ObjectMapper();
-	private String modo = "Lobby";
 	
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -34,25 +33,23 @@ public class GameHandler extends TextWebSocketHandler {
 	@Override
 	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
 		
-		System.out.println("Message received: " + message.getPayload());
+		//System.out.println("Message received: " + message.getPayload());
 		JsonNode node = mapper.readTree(message.getPayload());
 		
 		sendOtherParticipants(session, node);
 	}
 
 	private void sendOtherParticipants(WebSocketSession session, JsonNode node) throws IOException {
-		System.out.println("Message sent: " + node.toString());
+		System.out.println("Received message: '" + node.toString() + "' from client "+ session.getId());
 		
-		ObjectNode newNode = mapper.createObjectNode();
+		//ObjectNode newNode = mapper.createObjectNode();
+		//newNode.put("name", node.get("data").get("name").asText());
+		//newNode.put("message", node.get("message").asText());
 		
-		if(modo == "Lobby") {
-			newNode.put("name", node.get("name").asText());
-			//newNode.put("message", node.get("message").asText());
-		}
 			
 		for(WebSocketSession participant : sessions.values()) {
 			if(!participant.getId().equals(session.getId())) {
-				participant.sendMessage(new TextMessage(newNode.toString()));
+				participant.sendMessage(new TextMessage(node.toString()));
 			}
 		}
 		

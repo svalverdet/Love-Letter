@@ -31,7 +31,6 @@ public class PartidasController {
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public Partida nuevaPartida(@RequestBody Partida partida) {
-
 		return partidasService.postPartida(partida);
 	}
 	
@@ -63,9 +62,6 @@ public class PartidasController {
 
 		}
 	}
-	
-	
-	
 	
 	
 	//DELETE

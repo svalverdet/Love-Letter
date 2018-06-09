@@ -8,6 +8,21 @@
 		    cardSheetWidth: 178,
 		    cardSheetHeight: 208
 	};
+	
+	const WS_actions = {
+		incoming: {
+			JOIN_GAME: "JOIN_GAME",
+			LEAVE_GAME: "LEAVE_GAME",
+			LEAVE_GAME_LAST: "LEAVE_GAME_LAST",
+			START_GAME: "START_GAME"
+		},
+		outgoing: {
+			JOIN_GAME: "JOIN_GAME",
+			LEAVE_GAME: "LEAVE_GAME",
+			LEAVE_GAME_LAST: "LEAVE_GAME_LAST",
+			START_GAME: "START_GAME"
+		}
+	};
 
 	var game = new Phaser.Game(gameOptions.gameWidth, gameOptions.gameHeight, Phaser.AUTO);
 	game.id_jugador=-1;
@@ -37,7 +52,14 @@
 	game.connection.onclose = function() {
 		console.log("Closing socket");
 	}
-	game.
+	
+	game.sendMessage = function(action, data) {
+		let resp = {
+			action: action,
+			data: data
+		};
+		game.connection.send( JSON.stringify(resp) );
+	}
 		
 
 //})
