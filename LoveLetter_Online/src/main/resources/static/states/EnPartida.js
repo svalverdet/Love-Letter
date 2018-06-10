@@ -42,20 +42,20 @@ LoveLetterOnline.EnPartida.prototype = {
 			
 			switch (packet.action) {
 				case WS_actions.incoming.JOIN_GAME:
-					console.log("Se ha unido: " + packet.data.name);
-					that.obtenerPartida(function(partida){
+					console.log("Se ha unido: " + packet.name);
+					//that.obtenerPartida(function(partida){
 						//Se lo tiene que mandar sólo a los que estén con él en la partida
-						game.state.start('EnPartida', true, false, partida);
-					},partida_actual.id);
+						game.state.start('EnPartida', true, false, packet.partida);
+					//},partida_actual.id);
 					break;
 				case WS_actions.incoming.LEAVE_GAME:
-					console.log(packet.data.name + " salió de la partida.");
-					that.obtenerPartida(function(partida){
-						game.state.start('EnPartida', true, false, partida);
-					},partida_actual.id);
+					console.log(packet.name + " salió de la partida.");
+					//that.obtenerPartida(function(partida){
+						game.state.start('EnPartida', true, false, packet.partida);
+					//},partida_actual.id);
 					break;
 				case WS_actions.incoming.LEAVE_GAME_LAST:
-					console.log(packet.data.name + " salió de la partida.");
+					console.log(packet.name + " salió de la partida.");
 					break;
 				case WS_actions.incoming.START_GAME:
 					game.goTo('Jugar');
@@ -87,11 +87,11 @@ LoveLetterOnline.EnPartida.prototype = {
 					//Se comprueba si es el último en salir
 					if(partidaAct.numJug < 1){
 						that.deletePartida(function(){
-							game.sendMessage(WS_actions.outgoing.LEAVE_GAME_LAST, { name: jugador.nombre });
+							game.sendMessage(WS_actions.outgoing.LEAVE_GAME_LAST);
 							game.goTo('Lobby');
 						}, partidaAct.id);
 					}else{
-						game.sendMessage(WS_actions.outgoing.LEAVE_GAME, { name: jugador.nombre });
+						game.sendMessage(WS_actions.outgoing.LEAVE_GAME, { partida: partidaAct, name: jugador.nombre });
 						game.goTo('Lobby');
 					}
 				}

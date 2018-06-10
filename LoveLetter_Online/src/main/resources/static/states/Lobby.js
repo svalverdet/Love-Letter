@@ -93,11 +93,11 @@ LoveLetterOnline.Lobby.prototype = {
 					partida_tmp.numJug++;
 					that.putPartida(partida_tmp);
 					if(partida_tmp.numJug == partida_tmp.numJugMax){
-						game.sendMessage(WS_actions.outgoing.START_GAME);
+						game.sendMessage(WS_actions.outgoing.START_GAME, { partida: partida_tmp, name: jugActual.nombre });
 						game.goTo('Jugar'); 		
 					//Cuando la partida aun no esta a punto de llenarse
 					}else{
-						game.sendMessage(WS_actions.outgoing.JOIN_GAME, { name: jugActual.nombre });
+						game.sendMessage(WS_actions.outgoing.JOIN_GAME, { partida: partida_tmp, name: jugActual.nombre });
 						game.state.start('EnPartida', true, false, partida_tmp);
 					}
 				}

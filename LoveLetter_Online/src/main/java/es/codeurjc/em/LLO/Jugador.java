@@ -5,6 +5,7 @@ public class Jugador {
 	private long id = -1;
 	private String nombre;
 	private int partidasGanadas;
+	private String wsID;
 	
 	
 	//CONSTRUCTORES
@@ -38,10 +39,20 @@ public class Jugador {
 		this.partidasGanadas = partidasGanadas;
 	}
 
+	public String getWsID() {
+		return wsID;
+	}
+
+	public void setWsID(String string) {
+		this.wsID = string;
+	}
 
 	@Override
 	public String toString() {
-		return "Jugador [id=" + id + ",nombre=" + nombre + ", partidas ganadas=" + partidasGanadas +"]";
+		return "Jugador [id=" + id + ", nombre=" + nombre + ", partidasGanadas=" + partidasGanadas + ", wsID=" + wsID
+				+ "]";
 	}
+
+	
 
 }

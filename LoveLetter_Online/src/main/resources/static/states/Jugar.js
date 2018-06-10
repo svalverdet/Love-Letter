@@ -180,6 +180,7 @@ LoveLetterOnline.Jugar.prototype = {
 								   [ posManoJ2[0], posManoJ2[1]+gameOptions.cardSheetHeight+32],   
 								   [ posManoJ3[0], posManoJ3[1]+gameOptions.cardSheetHeight+32],   
 								   [ posManoJ4[0], posManoJ4[1]+gameOptions.cardSheetHeight+32]   ];
+	
 
 		botones = [];
 		posBoton1 = [gameOptions.gameWidth-300, 32];
@@ -797,7 +798,7 @@ LoveLetterOnline.Jugar.prototype = {
 			}
 			
 			//Se vuelve al menu
-			game.time.events.add(1000, function(){
+			game.time.events.add(2000, function(){
 				game.state.start('Menu');
 			});
 			
@@ -897,9 +898,12 @@ LoveLetterOnline.Jugar.prototype = {
 					game.time.events.add(1500, LoveLetterOnline.Jugar.prototype.elegirCarta, undefined, cartasManoJugadores[turnoJugador][1], undefined, undefined, 1, true);
 				}
 				else{
-					if(cartasManoJugadores[0][0] !== undefined) {cartasManoJugadores[0][0].events.onInputUp.add(LoveLetterOnline.Jugar.prototype.elegirCarta, this, 0, 0, false);}
-					if(cartasManoJugadores[0][1] !== undefined) {cartasManoJugadores[0][1].events.onInputUp.add(LoveLetterOnline.Jugar.prototype.elegirCarta, this, 0, 1, false);}
-					if(turnoJugador!==0){game.time.events.add(800, LoveLetterOnline.Jugar.prototype.elegirCarta, undefined, undefined, undefined, undefined, undefined, false)};
+					if(turnoJugador!==0){game.time.events.add(800, LoveLetterOnline.Jugar.prototype.elegirCarta, undefined, undefined, undefined, undefined, undefined, false)}
+					else {
+						if(cartasManoJugadores[0][0] !== undefined) {cartasManoJugadores[0][0].events.onInputUp.add(LoveLetterOnline.Jugar.prototype.elegirCarta, this, 0, 0, false);}
+						if(cartasManoJugadores[0][1] !== undefined) {cartasManoJugadores[0][1].events.onInputUp.add(LoveLetterOnline.Jugar.prototype.elegirCarta, this, 0, 1, false);}
+					}
+					
 				}
 			}
 			else{
@@ -911,6 +915,8 @@ LoveLetterOnline.Jugar.prototype = {
 			LoveLetterOnline.Jugar.prototype.finTurno();
 		}
 	}, 
+	
+	
 	
 	echarCartaDerrotados: function(carta, jugador){
 		var tween;

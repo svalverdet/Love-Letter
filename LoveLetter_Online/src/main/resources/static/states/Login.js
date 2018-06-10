@@ -39,9 +39,12 @@ LoveLetterOnline.Login.prototype = {
 			if(nuevo == false){
 				console.log("no se crea");
 				game.id_jugador = id_tmp;
+				game.sendMessage(WS_actions.outgoing.LOGIN, { id: game.id_jugador });
 			}else{
 				console.log("se crea");
-				that.createJugador(jugador);
+				that.createJugador(function(){
+					game.sendMessage(WS_actions.outgoing.LOGIN, { id: game.id_jugador });
+				},jugador);
 			}
 			
 			/*
@@ -59,7 +62,7 @@ LoveLetterOnline.Login.prototype = {
 	},
 	
 	//Create jugador in server
-	createJugador: function(jugador) {
+	createJugador: function(callback, jugador) {
 		$.ajax({
 			method: "POST",
 			url: 'http://localhost:8080/jugadores',
@@ -72,6 +75,7 @@ LoveLetterOnline.Login.prototype = {
 			//Una vez ha creado el jugador, asigna el id al juego
 			console.log("Jugador created: " + JSON.stringify(jugador));
 			game.id_jugador = jugador.id;
+			callback();
 		});
 	},
 	

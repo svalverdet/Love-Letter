@@ -1,6 +1,7 @@
 package es.codeurjc.em.LLO;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -40,22 +41,32 @@ public class GameHandler extends TextWebSocketHandler {
 			System.out.println("Message received: " + message.getPayload());
 			JsonNode node = mapper.readTree(message.getPayload());
 			
-			long num = 1;
+			long partida_id, jugador_id;
 			
 			switch(node.get("action").asText()) {
-			case("JOIN_GAME"):
-				
-				sendOtherParticipants(session, node, PartidasService.getPartida(num).getJugsPartida());
-				break;
-			default:
-				sendOtherParticipants(session, node, PartidasService.getPartida(num).getJugsPartida());
-				break;
+				case("LOGIN"):
+					jugador_id = node.get("data").get("id").asLong();
+					JugadoresService.getJugador(jugador_id).setWsID(session.getId());
+					break;
+				case("JOIN_GAME"):
+				case("LEAVE_GAME"):
+				case("START_GAME"):
+					partida_id = node.get("data").get("partida").get("id").asLong();
+					sendOtherParticipants(session, node, PartidasService.getPartida(partida_id).getJugsPartida());
+					break;
+				/*case("LEAVE_GAME_LAST"):
+					partida_id = node.get("data").get("id").asLong();
+					PartidasService.deletePartida(partida_id);
+					
+					break;*/
+				default:
+					break;
 			}
 		}
 		
 	}
 
-	private void sendOtherParticipants(WebSocketSession session, JsonNode node, Collection<Jugador> participants) throws IOException {
+	private void sendOtherParticipants(WebSocketSession session, JsonNode node, List<Jugador> participants) throws IOException {
 		System.out.println("Message sent: '" + node.toString() + "' from client "+ session.getId());
 		
 		ObjectNode newNode = mapper.createObjectNode();
@@ -64,21 +75,54 @@ public class GameHandler extends TextWebSocketHandler {
 		//newNode.put("message", node.get("message").asText());
 		
 		
+		//List<Jugador> participantss = (List<Jugador>) mapper.treeToValue(node.get("data").get("partida").get("jugsPartida"), Jugador.class);
+		
 		//switch
-		
-		/*
-		List<WebSocketSession> participantSessions = new ArrayList<>();
-		
-		for(int i=0; i<participants.size(); i++) {
-			sessions.values().
+		switch(node.get("action").asText()) {
+			case("JOIN_GAME"):
+			case("LEAVE_GAME"):
+			case("START_GAME"):
+				newNode.put("name", node.get("data").get("name").asText());
+				//newNode.putArray("partida").add(node.get("data").get("partida").asText());
+				//hacer el for...
+				//Field[] f = Partida.class.getDeclaredFields();
+				//Partida.class.getDeclaredFields()[0].getName();
+				//for(int i=0; i<f.length; i++) {
+					
+				//}
+				//ObjectNode n =
+				newNode.set("partida", node.get("data").get("partida"));
+				
+				
+				break;
+			case("LEAVE_GAME_LAST"):
+				newNode.put("name", node.get("data").get("name").asText());
+				break;
+			default:
+				break;
 		}
-		*/
-		for(WebSocketSession participant : sessions.values()) {
-			if(!participant.getId().equals(session.getId())) {
-				participant.sendMessage(new TextMessage(node.toString()));
+		
+		
+		//Mandar el mensaje únicamente a los demás jugadores de la sala
+		if(participants != null) {
+			WebSocketSession p;
+			//Toma las sesiones de los jugadores que están en la sala
+			for(int i=0; i<participants.size(); i++) {
+				String id = participants.get(i).getWsID();
+				p = sessions.get(id);
+				
+				if(!p.getId().equals(session.getId())) {
+					p.sendMessage(new TextMessage(newNode.toString()));
+				}
+			}
+		//Mandar el mensaje a todas las sesiones
+		}else {
+			for(WebSocketSession participant : sessions.values()) {
+				if(!participant.getId().equals(session.getId())) {
+					participant.sendMessage(new TextMessage(newNode.toString()));
+				}
 			}
 		}
-		
 	}
 
 }

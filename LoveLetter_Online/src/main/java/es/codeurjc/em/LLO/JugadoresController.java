@@ -24,22 +24,22 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/jugadores")
 public class JugadoresController {
 
-	private Map<Long, Jugador> jugadores = new HashMap<Long, Jugador>();
-	private AtomicLong lastId = new AtomicLong();
+	//private Map<Long, Jugador> jugadores = new HashMap<Long, Jugador>();
+	//private AtomicLong lastId = new AtomicLong();
 	private final int MAX_HALL_OF_FAME_PLAYERS = 5;
 
 	
 	//GET
 	@RequestMapping(method = RequestMethod.GET)
 	public Collection<Jugador> jugadores() {
-		return jugadores.values();
+		return JugadoresService.getJugadores();
 	}
 	
 	//GET SORTED
 	@RequestMapping(value = "/sorted", method = RequestMethod.GET)
 	public Collection<Jugador> jugadoresOrd() {
 		List<Jugador> jugadoresAux = new ArrayList<>();
-		for(Jugador jugador : jugadores.values()) {
+		for(Jugador jugador : JugadoresService.getJugadores()) {
 			jugadoresAux.add(jugador);
 		}
 		Collections.sort(jugadoresAux,(o1, o2)-> o2.getPartidasGanadas()-o1.getPartidasGanadas());
@@ -56,20 +56,32 @@ public class JugadoresController {
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public Jugador nuevoJugador(@RequestBody Jugador jugador) {
-
+		return JugadoresService.postJugador(jugador);
+		/*
 		long id = lastId.incrementAndGet();
 		jugador.setId(id);
 		jugador.setPartidasGanadas(0);
 		jugadores.put(id, jugador);
 
 		return jugador;
+		*/
 	}
 
 	
 	//PUT
 	@PutMapping("/{id}")
 	public ResponseEntity<Jugador> actulizaJugador(@PathVariable long id, @RequestBody Jugador jugadorActualizado) {
+		
+		Jugador jugador = JugadoresService.actualizaJugador(id, jugadorActualizado);
 
+		if (jugador != null) {
+			return new ResponseEntity<>(jugadorActualizado, HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+		}
+		
+		/*
 		Jugador jugador = jugadores.get(id);
 
 		if (jugador != null) {
@@ -80,7 +92,7 @@ public class JugadoresController {
 			return new ResponseEntity<>(jugadorActualizado, HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
+		}*/
 	}
 
 	
@@ -88,20 +100,38 @@ public class JugadoresController {
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	public ResponseEntity<Jugador> getJugador(@PathVariable long id) {
 
+		Jugador jugador = JugadoresService.getJugador(id);//encuentra a la jugador
+
+		if (jugador != null) {//si existe
+			return new ResponseEntity<>(jugador, HttpStatus.OK);//devuelve sus datos
+		} else {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+		
+		/*
 		Jugador jugador = jugadores.get(id);
 
 		if (jugador != null) {
 			return new ResponseEntity<>(jugador, HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
+		}*/
 	}
 
 	
 	//DELETE
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 	public ResponseEntity<Jugador> borraJugador(@PathVariable long id) {
+		
+		Jugador jugador = JugadoresService.deleteJugador(id);
 
+		if (jugador != null) {
+			return new ResponseEntity<>(jugador, HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+		
+		/*
 		Jugador jugador = jugadores.remove(id);
 
 		if (jugador != null) {
@@ -109,5 +139,6 @@ public class JugadoresController {
 		} else {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
+		*/
 	}
 }
