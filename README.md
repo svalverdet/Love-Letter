@@ -51,27 +51,23 @@
 ---
 * **Navegación:**  
 
-![alt tag](https://github.com/svalverdet/Love-Letter-Online/blob/master/Love%20Letter%20Online-Sandra%20Valverde%20Tall%C3%B3n%2C%20Sara%20L%C3%B3pez%20Garc%C3%ADa/disenoDiagrama-pt1.png)  
+![Alt Text](https://github.com/svalverdet/Love-Letter-Online/blob/master/LoveLetter_Online/src/main/resources/static/assets/prueba/navegaci%C3%B3n.png)
   
-La pantalla 0 será la primera que se vea al iniciar el juego. Aparecerá un cuadro emergente en el que habrá que escribir el nombre del usuario con el que queremos jugar. Tras rellenar el campo al clicar sobre "entrar", el juego nos llevará a la pantalla 1. La pantalla 1 representa el menú del juego. Desde ahí se pueden empezar el juego consultar el ranking o volver al login. 
-La pantalla 2 representa el Ranking, donde se muestran las mejores 5 puntuaciones de los jugadores. 
-Por último, la pantalla 3 contiene el lobby. Desde él se pueden crear partidas y unirse a ellas. Una vez la partida a la que se haya unido el jugador se llene, se pasará a la pantalla 1 del siguiente diagrama.
-  
-![alt tag](https://github.com/svalverdet/Love-Letter-Online/blob/master/Love%20Letter%20Online-Sandra%20Valverde%20Tall%C3%B3n%2C%20Sara%20L%C3%B3pez%20Garc%C3%ADa/disenoDiagrama-pt2.png)
-  
-  La pantalla de menú (Pantalla1) tiene dos botones, el de jugar y el de instrucciones. Si se pulsa sobre "Instrucciones" saldrá una pantalla que las empieza a mostrar (P3). Pulsando sobre la flecha de la esquina inferior derecha se pasará a la siguiente pantalla de instrucciones y así hasta volver a la pantalla inicial. Si se pulsa sobre "Jugar" aparecerán tres botones (P2) para elegir el número de jugadores de la partida. Una vez pulsado se introducirá al jugador a la pantalla de juego (P6).  
+Al principio aparecerá un cuadro emergente en el que habrá que escribir el nombre del usuario con el que queremos jugar. Tras rellenar el campo al clicar sobre "entrar", el juego nos llevará a la pantalla 1. La pantalla 1 representa el menú del juego. Desde ahí se pueden empezar el juego consultar el ranking o volver al login. 
+La pantalla 3 representa el Ranking, donde se muestran las mejores 5 puntuaciones de los jugadores. 
+Por último, la pantalla 2 contiene el lobby. Desde él se pueden crear partidas y unirse a ellas. Una vez la partida a la que se haya unido el jugador se llene, se pasará a la pantalla 5, el propio juego (la pantalla 4 es solo una muestra de como se van llenando las partidas). 
     
-   ![alt tag](https://github.com/svalverdet/Love-Letter-Online/blob/master/Love%20Letter%20Online-Sandra%20Valverde%20Tall%C3%B3n%2C%20Sara%20L%C3%B3pez%20Garc%C3%ADa/captura1.png)
+![Alt Text](https://github.com/svalverdet/Love-Letter-Online/blob/master/LoveLetter_Online/src/main/resources/static/assets/prueba/captura1.png)
     
   Dentro de la pantalla de juego tendremos en nuestra esquina inferior derecha nuestra mano de cartas, mientras que en el centro inferiror estará nuestra pila de descarte. Los demás jugadores (de 2 a 4) tienen sus pilas de descarte en la parte superior (el jugador dos es el de más a la derecha, luego el tres y el cuatro a la izquierda). En el centro se encuentra el mazo y en la parte derecha se hayan unos botones que al pulsarlos hará que salga una pantalla emergente con información de cada carta o que servirán para acusar a un jugador (usando el Guardia). Esta ventana emergente podrá volver a minimizarse pulsando sobre la cruz de su esquina superior derecha (P7). La información de la ventana emergente viene dada por: el nombre de la carta, el número de cartas del mismo tipo (entre paréntesis), la descripción y su valor.  
   
- ![alt tag](https://github.com/svalverdet/Love-Letter-Online/blob/master/Love%20Letter%20Online-Sandra%20Valverde%20Tall%C3%B3n%2C%20Sara%20L%C3%B3pez%20Garc%C3%ADa/captura2.png)
+ ![Alt Text](https://github.com/svalverdet/Love-Letter-Online/blob/master/LoveLetter_Online/src/main/resources/static/assets/prueba/captura2.png)
     
   Por último a la izquierda hay un cuadro que da la información de las últimas tres acciones que han pasado en la partida. Este irá guiando la partida e indicando al jugador lo que debe hacer en cada momento. Informará de la identidad del ganador de cada ronda y del ganador de toda la partida. El ganador de la partida será el primer jugador que consiga 3 corazones.
 
 
 * **Diagrama de clases y API REST:**  
-![alt tag](https://github.com/svalverdet/Love-Letter-Online/blob/master/Love%20Letter%20Online-Sandra%20Valverde%20Tall%C3%B3n%2C%20Sara%20L%C3%B3pez%20Garc%C3%ADa/DiagramaClases.png) 
+ ![Alt Text](https://github.com/svalverdet/Love-Letter-Online/blob/master/LoveLetter_Online/src/main/resources/static/assets/prueba/DiagramaClases.png)
 
 * **Instrucciones:**    
 
