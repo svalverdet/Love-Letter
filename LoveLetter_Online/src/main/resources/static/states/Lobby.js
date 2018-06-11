@@ -29,7 +29,7 @@ LoveLetterOnline.Lobby.prototype = {
 		this.loadPartidas(function(partidas){
 			if (partidas.length<5){
 				var nomPartida = prompt("Introduce aquí el nombre de la partida", "Default_Game");
-				var numJugs = prompt("Introduce aquí el número de jugadores [2,4]", "3");
+				var numJugs = prompt("Introduce aquí el número de jugadores [2,4]", "2");
 					
 				var partida = {
 					nomPartida: nomPartida,
@@ -94,7 +94,7 @@ LoveLetterOnline.Lobby.prototype = {
 					that.putPartida(partida_tmp);
 					if(partida_tmp.numJug == partida_tmp.numJugMax){
 						game.sendMessage(WS_actions.outgoing.START_GAME, { partida: partida_tmp, name: jugActual.nombre });
-						game.goTo('Jugar'); 		
+						game.state.start('Jugar', true, false, partida_tmp); 		
 					//Cuando la partida aun no esta a punto de llenarse
 					}else{
 						game.sendMessage(WS_actions.outgoing.JOIN_GAME, { partida: partida_tmp, name: jugActual.nombre });

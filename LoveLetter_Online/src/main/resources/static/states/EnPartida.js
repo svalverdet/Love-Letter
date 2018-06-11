@@ -58,8 +58,12 @@ LoveLetterOnline.EnPartida.prototype = {
 					console.log(packet.name + " salió de la partida.");
 					break;
 				case WS_actions.incoming.START_GAME:
-					game.goTo('Jugar');
+					game.state.start('Jugar', true, false, packet.partida);
 					break;
+					/*
+				case "SEND_GAME_STATE":
+					game.sendMessage("RECEIVE_GAME_STATE", {state: game.state.current, id: packet.wsid});
+					break;*/
 				default: 
 					console.log("Error receiving message.");
 					break;

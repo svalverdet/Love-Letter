@@ -51,6 +51,12 @@ public class GameHandler extends TextWebSocketHandler {
 				case("JOIN_GAME"):
 				case("LEAVE_GAME"):
 				case("START_GAME"):
+				case("CONECTAR"):
+				case("pasar_turno"):
+				case("PASAR_VARIABLES_GLOBALES"):
+				case("REPARTIR"):
+				case("DESCARTAR"):
+				case("SEND_DECK_INDEX"):
 					partida_id = node.get("data").get("partida").get("id").asLong();
 					sendOtherParticipants(session, node, PartidasService.getPartida(partida_id).getJugsPartida());
 					break;
@@ -59,6 +65,8 @@ public class GameHandler extends TextWebSocketHandler {
 					PartidasService.deletePartida(partida_id);
 					
 					break;*/
+				
+					
 				default:
 					break;
 			}
@@ -71,33 +79,34 @@ public class GameHandler extends TextWebSocketHandler {
 		
 		ObjectNode newNode = mapper.createObjectNode();
 		newNode.put("action", node.get("action").asText());
-		//newNode.put("name", node.get("data").get("name").asText());
-		//newNode.put("message", node.get("message").asText());
 		
-		
-		//List<Jugador> participantss = (List<Jugador>) mapper.treeToValue(node.get("data").get("partida").get("jugsPartida"), Jugador.class);
-		
-		//switch
 		switch(node.get("action").asText()) {
 			case("JOIN_GAME"):
 			case("LEAVE_GAME"):
 			case("START_GAME"):
 				newNode.put("name", node.get("data").get("name").asText());
-				//newNode.putArray("partida").add(node.get("data").get("partida").asText());
-				//hacer el for...
-				//Field[] f = Partida.class.getDeclaredFields();
-				//Partida.class.getDeclaredFields()[0].getName();
-				//for(int i=0; i<f.length; i++) {
-					
-				//}
-				//ObjectNode n =
 				newNode.set("partida", node.get("data").get("partida"));
-				
-				
 				break;
 			case("LEAVE_GAME_LAST"):
 				newNode.put("name", node.get("data").get("name").asText());
 				break;
+			case("pasar_turno"):
+				newNode.put("turno", node.get("data").get("turno").asText());
+				break;
+			case("PASAR_VARIABLES_GLOBALES"):
+				newNode.set("mazo", node.get("data").get("mazo"));
+				break;
+			case("REPARTIR"):
+				newNode.set("tipo", node.get("data").get("tipo"));
+				newNode.set("jugadorReceptor", node.get("data").get("jugadorReceptor"));
+				break;
+			case("DESCARTAR"): 
+				newNode.set("tipo", node.get("data").get("tipo"));
+				newNode.set("indice", node.get("data").get("indice"));
+				newNode.set("jugadorReceptor", node.get("data").get("jugadorReceptor"));
+				break;
+			case("SEND_DECK_INDEX"):
+				newNode.put("id", node.get("data").get("id").asText());
 			default:
 				break;
 		}
