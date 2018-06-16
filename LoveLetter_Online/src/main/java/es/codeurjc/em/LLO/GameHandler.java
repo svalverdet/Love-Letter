@@ -24,14 +24,18 @@ public class GameHandler extends TextWebSocketHandler {
 	
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-		System.out.println("New user: " + session.getId());
-		sessions.put(session.getId(), session);
+		synchronized(sessions) {
+			System.out.println("New user: " + session.getId());
+			sessions.put(session.getId(), session);
+		}
 	}
 	
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-		System.out.println("Session closed: " + session.getId());
-		sessions.remove(session.getId());
+		synchronized(sessions) {
+			System.out.println("Session closed: " + session.getId());
+			sessions.remove(session.getId());
+		}
 	}
 	
 	@Override
@@ -52,11 +56,15 @@ public class GameHandler extends TextWebSocketHandler {
 				case("LEAVE_GAME"):
 				case("START_GAME"):
 				case("CONECTAR"):
-				case("pasar_turno"):
+				case("PASAR_TURNO"):
 				case("PASAR_VARIABLES_GLOBALES"):
 				case("REPARTIR"):
 				case("DESCARTAR"):
 				case("SEND_DECK_INDEX"):
+				case("HACER_DESAFIO"):
+				case("RESOLVER_DESAFIO"):
+				case("PASAR_ESTADO_JUGADOR"):
+				case("END_GAME"):
 					partida_id = node.get("data").get("partida").get("id").asLong();
 					sendOtherParticipants(session, node, PartidasService.getPartida(partida_id).getJugsPartida());
 					break;
@@ -90,7 +98,7 @@ public class GameHandler extends TextWebSocketHandler {
 			case("LEAVE_GAME_LAST"):
 				newNode.put("name", node.get("data").get("name").asText());
 				break;
-			case("pasar_turno"):
+			case("PASAR_TURNO"):
 				newNode.put("turno", node.get("data").get("turno").asText());
 				break;
 			case("PASAR_VARIABLES_GLOBALES"):
@@ -107,6 +115,36 @@ public class GameHandler extends TextWebSocketHandler {
 				break;
 			case("SEND_DECK_INDEX"):
 				newNode.put("id", node.get("data").get("id").asText());
+				break;
+			case("HACER_DESAFIO"):
+				newNode.set("jugadorA", node.get("data").get("jugadorA"));
+				newNode.set("jugadorB", node.get("data").get("jugadorB"));
+				
+				newNode.set("personaje1", node.get("data").get("personaje1"));
+				newNode.set("valor1", node.get("data").get("valor1"));
+				newNode.set("tipoframe1", node.get("data").get("tipoframe1"));
+				
+				newNode.set("acusacion", node.get("data").get("acusacion"));
+				
+				newNode.set("personaje2", node.get("data").get("personaje2"));
+				newNode.set("valor2", node.get("data").get("valor2"));
+				newNode.set("tipoframe2", node.get("data").get("tipoframe2"));
+				break;
+			case("RESOLVER_DESAFIO"):
+				newNode.set("jugadorA", node.get("data").get("jugadorA"));
+				newNode.set("jugadorB", node.get("data").get("jugadorB"));
+				
+				newNode.set("acusacion", node.get("data").get("acusacion"));
+				
+				newNode.set("personajeB", node.get("data").get("personajeB"));
+				newNode.set("valorB", node.get("data").get("valorB"));
+				newNode.set("tipoframeB", node.get("data").get("tipoframeB"));
+				break;
+			case("PASAR_ESTADO_JUGADOR"):
+				newNode.set("jugador", node.get("data").get("jugador"));
+				newNode.set("vivo", node.get("data").get("vivo"));
+				newNode.set("protegido", node.get("data").get("protegido"));
+				newNode.set("corazones", node.get("data").get("corazones"));
 			default:
 				break;
 		}
