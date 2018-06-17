@@ -18,6 +18,7 @@ LoveLetterOnline.Ranking.prototype = {
 			that.mostrarTexto();
 			that.mostrarJugadores(jugadores);
 			that.mostrarPtsJugActual();
+			that.mostrarJug();
 		});	
 	},
 	
@@ -55,6 +56,14 @@ LoveLetterOnline.Ranking.prototype = {
 		let tmp;
 		that.obtenerJugador(function(jugador){
 			tmp = that.add.text(that.world.centerX, (that.world.centerY-200)+300, 'Tu puntuación: '+jugador.partidasGanadas, {fill: "#ffffff"});
+			tmp.anchor.x = 0.5;
+		});
+	},
+	
+	mostrarJug: function(){
+		let tmp;
+		that.obtenerJugador(function(jugador){
+			tmp = that.add.text(that.world.centerX, that.world.centerY+250, 'Estás registrado como: '+jugador.nombre, {fill: "#ffffff"});
 			tmp.anchor.x = 0.5;
 		});
 	},

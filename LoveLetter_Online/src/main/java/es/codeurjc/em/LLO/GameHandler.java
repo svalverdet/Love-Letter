@@ -88,9 +88,11 @@ public class GameHandler extends TextWebSocketHandler {
 				case("SEND_DECK_INDEX"):
 				case("HACER_DESAFIO"):
 				case("RESOLVER_DESAFIO"):
+				case("DO_ANIM"):
 				case("PASAR_ESTADO_JUGADOR"):
 				case("DERROTADO"):
 				case("END_GAME"):
+				case("MESSAGE"):
 				case("SOLICITAR_CARTAS"):
 				case("FIN_RONDA"):
 					partida_id = node.get("data").get("partida").get("id").asLong();
@@ -146,6 +148,13 @@ public class GameHandler extends TextWebSocketHandler {
 			case("SEND_DECK_INDEX"):
 				newNode.put("id", node.get("data").get("id").asText());
 				break;
+			case("DO_ANIM"):
+				newNode.set("jugadorA", node.get("data").get("jugadorA"));
+				newNode.set("jugadorB", node.get("data").get("jugadorB"));
+				
+				newNode.set("cartaA", node.get("data").get("cartaA"));
+				newNode.set("tipoframeB", node.get("data").get("tipoframeB"));
+				break;
 			case("HACER_DESAFIO"):
 				newNode.set("jugadorA", node.get("data").get("jugadorA"));
 				newNode.set("jugadorB", node.get("data").get("jugadorB"));
@@ -180,6 +189,10 @@ public class GameHandler extends TextWebSocketHandler {
 				newNode.set("solicitante", node.get("data").get("solicitante"));
 				newNode.set("solicitado", node.get("data").get("solicitado"));
 				newNode.set("valor", node.get("data").get("valor"));
+				break;
+			case("MESSAGE"):
+				newNode.set("msg", node.get("data").get("msg"));
+				newNode.set("receptor", node.get("data").get("receptor"));
 				break;
 			case("DERROTADO"):
 				newNode.set("jugador", node.get("data").get("jugador"));

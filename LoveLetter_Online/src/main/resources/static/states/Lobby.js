@@ -188,5 +188,8 @@ LoveLetterOnline.Lobby.prototype = {
 		texto_refrescar.anchor.x = 0.5;
 		texto_refrescar.inputEnabled = true;
 		texto_refrescar.events.onInputDown.add(function(){game.goTo('Lobby')}, this);
+		
+		//Nombre usuario
+		that.add.text(that.world.centerX, that.world.centerY+250, 'Estás registrado como: '+jugador.nombre, {fill: "#ffffff"}).anchor.x = 0.5;
 	}
 };

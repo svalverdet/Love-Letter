@@ -47,14 +47,6 @@ LoveLetterOnline.Login.prototype = {
 				},jugador);
 			}
 			
-			/*
-			var msg = {
-					name : "Ayyy"
-				}
-			game.connection.send(JSON.stringify(msg));
-			console.log("Mensaje enviado: "+msg);			
-			*/
-			
 			game.goTo('Menu');
 			
 		});

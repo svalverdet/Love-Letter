@@ -27,6 +27,8 @@ LoveLetterOnline.EnPartida.prototype = {
 		texto_volver.inputEnabled = true;
 		texto_volver.events.onInputDown.add(this.volver, this);
 		
+		this.mostrarJug();
+		
 		
 		//WEBSOCKETS
 	
@@ -60,10 +62,7 @@ LoveLetterOnline.EnPartida.prototype = {
 				case WS_actions.incoming.START_GAME:
 					game.state.start('Jugar', true, false, packet.partida);
 					break;
-					/*
-				case "SEND_GAME_STATE":
-					game.sendMessage("RECEIVE_GAME_STATE", {state: game.state.current, id: packet.wsid});
-					break;*/
+					
 				default: 
 					console.log("Error receiving message.");
 					break;
@@ -104,6 +103,13 @@ LoveLetterOnline.EnPartida.prototype = {
 	},
 	
 	
+	mostrarJug: function(){
+		let tmp;
+		that.obtenerJugador(function(jugador){
+			tmp = that.add.text(that.world.centerX, that.world.centerY+250, 'Estás registrado como: '+jugador.nombre, {fill: "#ffffff"});
+			tmp.anchor.x = 0.5;
+		});
+	},
 	
 	//REST
 	
