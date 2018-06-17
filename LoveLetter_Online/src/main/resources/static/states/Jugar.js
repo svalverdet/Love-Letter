@@ -21,6 +21,7 @@ LoveLetterOnline.Jugar = function(game){
 	var turnoJugador; //A qué jugador le toca jugar
 	var corazonesParaGanar = 1;
 	var ganadorJuego;
+	var cartasDePosiblesGanadores = [];
 
 	var cartasManoJugadores = []; //Las cartas que tiene el jugador en concreto en mano
 	var cartasMesaJugadores = []; //Las cartas que ha ido descartando el jugador en concreto
@@ -71,6 +72,17 @@ LoveLetterOnline.Jugar = function(game){
 		/*****************/
 LoveLetterOnline.Jugar.prototype = {
 	
+	/************
+	* relaciones de confianza - grupo de IPs para acceder a mi servidor java
+	* PENDIENTE:
+	* - Mensajes en el juego
+	* - Animaciones
+	* - permitir varias rondas
+	* - mensaje "notificar al ganador" en vez de modificar al jugador desde otro sitio
+	* - ganar con el asesino o con el mayordomo
+	***********/
+	
+	// SECCION 1: INICIALIZACIÓN DEL JUEGO Y MENSAJES WS (EN INIT)
 	
 	preload: function(){	/********CHECK - SOBRA COMIENZO?*********/
 	
@@ -97,8 +109,6 @@ LoveLetterOnline.Jugar.prototype = {
 		
 		comienzo = false;
 	},
-	
-	// SECCION 1: INICIALIZACIÓN DEL JUEGO Y MENSAJES WS (EN INIT)
 	
 	init: function(partida){
 		
@@ -143,7 +153,7 @@ LoveLetterOnline.Jugar.prototype = {
 					that.animacionRepartir(packet.tipo, packet.jugadorReceptor);
 					break;
 				case "DESCARTAR":
-					that.animacionDescartar(packet.tipo, packet.indice, packet.jugadorReceptor);
+					that.animacionDescartar(packet.tipo, packet.indice, packet.jugadorReceptor, packet.hacerEfecto, packet.muerto);
 					break;
 				case "HACER_DESAFIO":
 					if(pos_ingame == packet.jugadorB){
@@ -178,7 +188,7 @@ LoveLetterOnline.Jugar.prototype = {
 									cartasManoJugadores[0].destroy();
 									delete cartasManoJugadores[0];
 									cartasManoJugadores[0] = cartaAux;
-									cartasManoJugadores[0].events.onInputUp.add(that.elegirCarta, this, 0, 0);
+									cartasManoJugadores[0].events.onInputUp.addOnce(that.elegirCarta, this, 0, 0);
 								}else {
 									
 									cartaAux = that.crearCarta(posManoJugadores[0][0]-gameOptions.cardSheetWidth-32, posManoJugadores[0][1], packet.personaje2, packet.valor2, packet.tipoframe2, true, true);
@@ -186,23 +196,28 @@ LoveLetterOnline.Jugar.prototype = {
 									cartasManoJugadores[1].destroy();
 									delete cartasManoJugadores[1];
 									cartasManoJugadores[1] = cartaAux;
-									cartasManoJugadores[1].events.onInputUp.add(that.elegirCarta, this, 0, 1);
+									cartasManoJugadores[1].events.onInputUp.addOnce(that.elegirCarta, this, 0, 1);
 								}
 						
 							break;
 							case "Principe":
-								console.log("Ma hecho dejcartarme el mu kbron");
+								console.log("Ma hecho dejcartarm");
 								
 								//Se descarta
 								cartasMesaJugadores.push(carta);
-								that.animacionDescartar(carta.tipoframe, indice, packet.jugadorB);
-								game.sendMessage("DESCARTAR", {partida: partida_actual, tipo: carta.tipoframe, indice: indice, jugadorReceptor: packet.jugadorB});
 								
-								/**************NO COMPROBADO******************/
 								if(carta.personaje == "Princesa"){
+									
+									that.animacionDescartar(carta.tipoframe, indice, packet.jugadorB, true, true);
+									game.sendMessage("DESCARTAR", {partida: partida_actual, tipo: carta.tipoframe, indice: indice, jugadorReceptor: packet.jugadorB, hacerEfecto: true, muerto: true});
+								
 									cartaDescarteJugadores[pos_ingame].vivo = false;
 									game.sendMessage("PASAR_ESTADO_JUGADOR", {partida: partida_actual, jugador: pos_ingame, vivo: cartaDescarteJugadores[pos_ingame].vivo, protegido: cartaDescarteJugadores[pos_ingame].protegido, corazones: cartaDescarteJugadores[pos_ingame].corazones});
 								}else{
+									
+									that.animacionDescartar(carta.tipoframe, indice, packet.jugadorB, false, false);
+									game.sendMessage("DESCARTAR", {partida: partida_actual, tipo: carta.tipoframe, indice: indice, jugadorReceptor: packet.jugadorB, hacerEfecto: false, muerto: false});
+								
 									/************* Y SI ES LA ÚLTIMA CARTA??? - sí, hay fallo  *****************/
 									//Se roba una nueva
 									that.sacarCartaMazo(packet.jugadorB);
@@ -212,11 +227,45 @@ LoveLetterOnline.Jugar.prototype = {
 								
 							break;
 							
+							case "Cura":
+								//Paso mi carta de mi al que la solicitó
+								//that.animEnsenarCarta();
+								
+								var xPrev = carta.position.x;
+								var yPrev = carta.position.y;
+								
+								var pos = packet.jugadorA - pos_ingame;
+								if(pos<0) pos+=numeroJugadores;
+								
+								var tween = game.add.tween(carta).to({
+									x: posManoJugadores[pos][0], 
+									y: posManoJugadores[pos][1]
+								},750,Phaser.Easing.Cubic.Out, true);
+		
+								//Le digo al resto que repitan la animación
+								//Cuando acaba, resuelvo desafío
+								tween.onComplete.add(function() {
+									game.time.events.add(1000, function(){
+										var tween2 = game.add.tween(carta).to({
+											x: xPrev, 
+											y: yPrev
+										},750,Phaser.Easing.Cubic.Out, true);
+										
+										//tween2.onComplete.add(function() {
+											game.sendMessage("RESOLVER_DESAFIO", {partida: partida_actual, jugadorA: packet.jugadorA, jugadorB: packet.jugadorB, acusacion: packet.acusacion, personajeB: carta.personaje, valorB: carta.valor, tipoframeB: carta.tipoframe});
+										//});
+									});
+								});
+								
+								
+							break;
+							
 							default: //Guardia, cura, barón y baronesa
 							break;
 						}
 						
 						//Siempre se le va a devolver el mando al jugador desafiante para que pase él el turno
+						if(packet.personaje1 != "Cura")
 						game.sendMessage("RESOLVER_DESAFIO", {partida: partida_actual, jugadorA: packet.jugadorA, jugadorB: packet.jugadorB, acusacion: packet.acusacion, personajeB: carta.personaje, valorB: carta.valor, tipoframeB: carta.tipoframe});
 					}
 					break;
@@ -232,6 +281,58 @@ LoveLetterOnline.Jugar.prototype = {
 					cartaDescarteJugadores[packet.jugador].corazones = packet.corazones;
 					break;
 					
+				case "SOLICITAR_CARTAS":
+					//Si me piden cartas, las mando, si recibo cartas, las añado al array
+					if(packet.valor == undefined && packet.solicitado == pos_ingame){
+						var carta;
+						if(cartasManoJugadores[0] != undefined) {
+							carta = cartasManoJugadores[0];
+						}else {
+							carta = cartasManoJugadores[1];
+						}
+						game.sendMessage("SOLICITAR_CARTAS", {partida: partida_actual, solicitante: packet.solicitante, solicitado: pos_ingame, valor: carta.valor});
+					
+					}else if(packet.solicitante == pos_ingame){
+						cartasDePosiblesGanadores.push(packet.solicitado); 
+						cartasDePosiblesGanadores.push(packet.valor);
+						
+						//Si ya están añadidos todos los posibles ganadores, se calcula cuál de ellos es el ganador
+						if(that.getNumJugsVivos() == cartasDePosiblesGanadores.length/2){
+							
+							var max = 0;
+							var ganador;
+							for(var i=0; i<cartasDePosiblesGanadores.length; i+=2){
+								if(cartasDePosiblesGanadores[i+1] > max) {
+									max = cartasDePosiblesGanadores[i+1];
+									ganador = cartasDePosiblesGanadores[i];
+								}
+							}
+							
+							that.finRonda(ganador);
+							
+							console.log("SE HAN ACABADO LAS CARTAS Y HA GANADO EL JUGADOR " + (ganador+1));
+							
+						}
+					}
+					break;
+				case "DERROTADO":
+					if(pos_ingame == packet.jugador){
+						console.log("He muerto, me descarto mi carta");
+						//La carta que tiene en la mano el jugador que ha sido derrotado
+						var carta;
+						var indice;
+						if(cartasManoJugadores[0] != undefined) {
+							carta = cartasManoJugadores[0];
+							indice = 0;
+						}else {
+							carta = cartasManoJugadores[1];
+							indice = 1;
+						}
+						that.animacionDescartar(carta.tipoframe, indice, pos_ingame, false, true);
+						game.sendMessage("DESCARTAR", {partida: partida_actual, tipo: carta.tipoframe, indice: indice, jugadorReceptor: pos_ingame, hacerEfecto: false, muerto: true});		
+					}
+					break;
+					
 				case "PASAR_TURNO":									///////PARA COSAS QUE SE PASAN CUANDO ACABA UN TURNO, INDICE MAZO TAMBIEN o pasar objeto / pasar numero
 					console.log("El turno "+ packet.turno + " ha finalizado.\nAhora es el turno del jugador "+(packet.turno%numeroJugadores + 1));
 					global_turnos = packet.turno;
@@ -240,9 +341,14 @@ LoveLetterOnline.Jugar.prototype = {
 						that.hacerJugada();
 					}
 					break;
+				case "FIN_RONDA":
+					console.log("Pinto los corazones del ganador.");
+					that.pintarCorazones(packet.jugador);
+					break;
 				case "END_GAME": 
 					console.log("Se acabó el juego.");
-					game.time.events.add(3000,function(){
+					that.deletePartida(partida_actual.id);
+					game.time.events.add(6000,function(){
 						game.goTo("Menu");
 					});
 					break;
@@ -290,6 +396,7 @@ LoveLetterOnline.Jugar.prototype = {
 		numeroJugadores = partida_actual.numJug; //Número entre 2 y 4.	
 		//turnoJugador; //A qué jugador le toca jugar
 		corazonesParaGanar = 1;
+		cartasDePosiblesGanadores = [];
 		
 		cartasManoJugadores = []; //Las cartas que tienen los jugadores en mano
 		cartasMesaJugadores = []; //Las cartas que han ido descartando los jugadores
@@ -431,7 +538,7 @@ LoveLetterOnline.Jugar.prototype = {
 		cuadroPartida.addChild(textoPartida);
 	}, 
 	
-	abrirAyuda: function(a, b, indice){/*******CHECK**********/
+	abrirAyuda: function(a, b, indice){/*******OK**********/
 		
 		//La ventana se abre sólo si no está abierta o abriéndose
 		if ((tweenAyuda !== null && tweenAyuda.isRunning) || popupAyuda.scale.x === 1)
@@ -461,7 +568,7 @@ LoveLetterOnline.Jugar.prototype = {
 		console.log("Turno del jugador "+ (pos_ingame + 1));
 		
 		//Comprobar si el juego ha llegado a su fin
-		if(!that.isFinJuego()){
+		if(!that.isFinRonda()){
 			if(cartaDescarteJugadores[pos_ingame].vivo){
 				
 				//Al inicio de cada ronda me desprotejo
@@ -470,11 +577,12 @@ LoveLetterOnline.Jugar.prototype = {
 					game.sendMessage("PASAR_ESTADO_JUGADOR", {partida: partida_actual, jugador: pos_ingame, vivo: cartaDescarteJugadores[pos_ingame].vivo, protegido: cartaDescarteJugadores[pos_ingame].protegido, corazones: cartaDescarteJugadores[pos_ingame].corazones});
 				}
 				
+				//Se hace el reparto si quedan cartas, si no, se calcula el ganador
 				console.log("Me reparten una carta.");
+				
 				if(global_indiceMazo<global_mazo.length){
+					//if(global_indiceMazo<5){
 					that.sacarCartaMazo(pos_ingame);
-					global_indiceMazo++;
-					game.sendMessage("SEND_DECK_INDEX", {partida: partida_actual, id: global_indiceMazo});
 					
 					if(global_turnos>=numeroJugadores){
 						console.log("Ahora elijo una carta y en el callback paso el turno.");
@@ -482,6 +590,24 @@ LoveLetterOnline.Jugar.prototype = {
 						console.log("Repartiendo...");
 						global_turnos++;
 						game.time.events.add(750, game.sendMessage, this, "PASAR_TURNO", {partida: partida_actual, turno: global_turnos});
+					}
+				}else{
+					//Solicito las cartas al resto de jugadores
+					console.log("No puedo robar carta, no quedan. Calculo el ganador.");
+					
+					//Añado mi carta al array de posibles ganadores
+					var carta;
+					if(cartasManoJugadores[0] != undefined) {
+						carta = cartasManoJugadores[0];
+					}else {
+						carta = cartasManoJugadores[1];
+					}
+					cartasDePosiblesGanadores.push(pos_ingame); 
+					cartasDePosiblesGanadores.push(carta.valor);
+					
+					for(var i=0; i<cartaDescarteJugadores.length; i++){
+						if(pos_ingame != i && cartaDescarteJugadores[i].vivo)
+							game.sendMessage("SOLICITAR_CARTAS", {partida: partida_actual, solicitante: pos_ingame, solicitado: i, valor: undefined});
 					}
 				}
 			}else{
@@ -492,7 +618,7 @@ LoveLetterOnline.Jugar.prototype = {
 		}
 	},
 	
-	sacarCartaMazo: function(jugadorReceptor){/*******CHECK - SOLO LA SACA EL CLIENTE AL QUE LE HAN DICHO QUE LA SAQUE, SIN EMBARGO LA ANIMACION LA DEBEN HACER TODOS DESPUES**********/
+	sacarCartaMazo: function(jugadorReceptor){/*******CHECK**********/
 		
 		//Según el índice se accede al tipo de carta
 		var tipo = global_mazo[global_indiceMazo];
@@ -500,10 +626,11 @@ LoveLetterOnline.Jugar.prototype = {
 		//Desplazamiento de la carta hacia la mano del jugador.
 		that.animacionRepartir(tipo,jugadorReceptor);
 		game.sendMessage("REPARTIR", {partida: partida_actual, tipo: tipo, jugadorReceptor: jugadorReceptor});
-
-		//Reparto automático de la primera ronda
-		/*******SE ENCARGARÍA EL SERVIDOR - CANPLAY VA A SER ELIMINADO**********/
-		//if(global_turnos<numeroJugadores) canPlay = true;
+		
+		//Se actualiza el índice del mazo
+		global_indiceMazo++;
+		game.sendMessage("SEND_DECK_INDEX", {partida: partida_actual, id: global_indiceMazo});
+					
 	}, 
 	
 	animacionRepartir: function(tipo, jugadorReceptor){/*******CHECK**********/
@@ -621,10 +748,10 @@ LoveLetterOnline.Jugar.prototype = {
 			
 			if(cartasManoJugadores[0] == undefined) {
 				cartasManoJugadores[0] = carta;
-				cartasManoJugadores[0].events.onInputUp.add(that.elegirCarta, this, 0, 0);
+				cartasManoJugadores[0].events.onInputUp.addOnce(that.elegirCarta, this, 0, 0);
 			}else {
 				cartasManoJugadores[1] = carta;
-				cartasManoJugadores[1].events.onInputUp.add(that.elegirCarta, this, 0, 1);
+				cartasManoJugadores[1].events.onInputUp.addOnce(that.elegirCarta, this, 0, 1);
 			}
 		
 		//Si el turno no es "mio"
@@ -679,8 +806,15 @@ LoveLetterOnline.Jugar.prototype = {
 			}else{
 				cartasMesaJugadores.push(carta);
 			
-				that.animacionDescartar(carta.tipoframe, indice, pos_ingame);
-				game.sendMessage("DESCARTAR", {partida: partida_actual, tipo: carta.tipoframe, indice: indice, jugadorReceptor: pos_ingame});
+				if(carta.personaje == "Princesa"){
+					that.animacionDescartar(carta.tipoframe, indice, pos_ingame, true, true);
+					game.sendMessage("DESCARTAR", {partida: partida_actual, tipo: carta.tipoframe, indice: indice, jugadorReceptor: pos_ingame, hacerEfecto: true, muerto: true});
+				
+				}else{
+					that.animacionDescartar(carta.tipoframe, indice, pos_ingame, true, false);
+					game.sendMessage("DESCARTAR", {partida: partida_actual, tipo: carta.tipoframe, indice: indice, jugadorReceptor: pos_ingame, hacerEfecto: true, muerto: false});
+				
+				}
 				
 				//Una vez elijo la carta, paso el turno al siguiente
 				//El turno al resto lo paso una vez se haya cumplido el efecto de la carta
@@ -688,14 +822,14 @@ LoveLetterOnline.Jugar.prototype = {
 				
 				//Se hace el efecto de la carta
 				console.log("Ahora la carta debería hacer algún efecto...");
-				game.time.events.add(1250,that.accionCarta, this, carta, indice);
+				game.time.events.add(1000,that.accionCarta, this, carta, indice);
 			}
 		}else{
 			console.log("No puedes echar carta, todavía no se ha terminado de repartir o es el turno del jugador "+ (global_turnos%numeroJugadores + 1));
 		}
 	}, 
 	
-	animacionDescartar: function(tipo, indice, jugadorReceptor){/*******CHECK - CUIDADO CON EL DELETE CARTAS MANO**********/
+	animacionDescartar: function(tipo, indice, jugadorReceptor, hacerEfecto, muerto){/*******CHECK - CUIDADO CON EL DELETE CARTAS MANO**********/
 		
 		var tween;
 		var pos = jugadorReceptor - pos_ingame;
@@ -720,7 +854,35 @@ LoveLetterOnline.Jugar.prototype = {
 			//Se añade la imagen encima
 			var im_temp = game.add.image(posMesaJugadores[pos][0], posMesaJugadores[pos][1], 'cartas1', carta.tipoframe);
 			im_temp.anchor.setTo(0.5, 0.5);
+			
+			//Habrá veces en las que no se quiere que se vea la animación, como cuando muere alguien o le hacen descartarse
+			if(hacerEfecto){
+				game.time.events.add(700, function(){
+					im_temp = game.add.image(posMesaJugadores[pos][0], posMesaJugadores[pos][1], 'cartas2', carta.tipoframe);
+					im_temp.anchor.setTo(0.5, 0.5);
+					
+					//if(carta.personaje == "Criada" || carta.personaje == "Mayordomo"){
+					if(carta.tipoframe == 19 || carta.tipoframe == 21){
+						var img_tp = game.add.image(posMesaJugadores[pos][0], posMesaJugadores[pos][1], 'protegido');
+						img_tp.alpha = 0;
+						img_tp.anchor.setTo(0.5, 0.5);
+						game.add.tween(img_tp).to( { alpha: 0.7 }, 2000, Phaser.Easing.Linear.None, true);
+					}
+				});
+			}
+			if(muerto){
+				game.time.events.add(800, function(){
+					capaOscura = game.add.graphics(0,0);
+					capaOscura.beginFill("#000000", 0.6);
+					capaOscura.drawRect(posMesaJugadores[pos][0]-gameOptions.cardSheetWidth/2, posMesaJugadores[pos][1]-gameOptions.cardSheetHeight/2, gameOptions.cardSheetWidth, gameOptions.cardSheetHeight);
+					capaOscura.endFill();
+				});
+				
+			}
+			
+			
 			carta.destroy();
+			delete carta;
 		}); 
 
 		//Se elimina la carta de la pantalla y del array.
@@ -733,10 +895,6 @@ LoveLetterOnline.Jugar.prototype = {
 	
 	accionCarta: function(carta, indice){/*******CHECK**********/
 		
-		/*******DECIRLE AL RESTO QUE CAMBIEN COMO SE VE LA MIA EN SU PANTALLA**********/
-		var im_temp = game.add.image(posMesaJugadores[0][0], posMesaJugadores[0][1], 'cartas2', carta.tipoframe);
-		im_temp.anchor.setTo(0.5, 0.5);
-
 		switch(carta.personaje){
 			
 			case "Asesino":
@@ -784,7 +942,6 @@ LoveLetterOnline.Jugar.prototype = {
 		}
 	}, 
 	
-	/*************   DETERMINAR     SIEMPRE      SI      PUEDO      HACER        ALGO        PARA       EVITAR     BLOQUEOS !!!!!!!  ************/
 	seleccionJugador: function(p, a, b, jugador){ /*******CHECK**********/
 		
 		console.log("HAS CLICADO SOBRE EL JUGADOR "+(jugador+1));
@@ -849,18 +1006,23 @@ LoveLetterOnline.Jugar.prototype = {
 					
 					case "Principe":
 						if(jugador == pos_ingame){
-							console.log("Te descartas a tí mismo");
+							console.log("Te descartas a ti mismo");
 							autoDescarte = true;
 							
 							//Se descarta
 							cartasMesaJugadores.push(carta2);
-							that.animacionDescartar(carta2.tipoframe, indice, pos_ingame);
-							game.sendMessage("DESCARTAR", {partida: partida_actual, tipo: carta2.tipoframe, indice: indice, jugadorReceptor: pos_ingame});
 							
 							if(carta2.personaje == "Princesa"){
+								that.animacionDescartar(carta2.tipoframe, indice, pos_ingame, true, true);
+								game.sendMessage("DESCARTAR", {partida: partida_actual, tipo: carta2.tipoframe, indice: indice, jugadorReceptor: pos_ingame, hacerEfecto: true, muerto: true});
+							
 								cartaDescarteJugadores[pos_ingame].vivo = false;
 								game.sendMessage("PASAR_ESTADO_JUGADOR", {partida: partida_actual, jugador: pos_ingame, vivo: cartaDescarteJugadores[pos_ingame].vivo, protegido: cartaDescarteJugadores[pos_ingame].protegido, corazones: cartaDescarteJugadores[pos_ingame].corazones});
+							
 							}else{
+								that.animacionDescartar(carta2.tipoframe, indice, pos_ingame, false, false);
+								game.sendMessage("DESCARTAR", {partida: partida_actual, tipo: carta2.tipoframe, indice: indice, jugadorReceptor: pos_ingame, hacerEfecto: false, muerto: false});
+							
 								/************* Y SI ES LA ÚLTIMA CARTA???  *****************/
 								//Se roba una nueva
 								that.sacarCartaMazo(pos_ingame);
@@ -887,7 +1049,7 @@ LoveLetterOnline.Jugar.prototype = {
 					break;
 				}
 				
-				if(!necesarioElegir && !autoDescarte && !guardiaActivo)
+				if(!necesarioElegir && !autoDescarte)
 					game.sendMessage("HACER_DESAFIO", {partida: partida_actual, jugadorA: pos_ingame, jugadorB: jugador, personaje1: carta1.personaje, valor1: carta1.valor, tipoframe1: carta1.tipoframe, personaje2: carta2.personaje, valor2: carta2.valor, tipoframe2: carta2.tipoframe, acusacion: acusacionGuardia});
 				
 			}else{
@@ -904,10 +1066,13 @@ LoveLetterOnline.Jugar.prototype = {
 			
 		//Tomo la carta que tiene el jugador desafiante en mano
 		var cartaMano;
+		var indice;
 		if(cartasManoJugadores[0] != undefined) {
 			cartaMano = cartasManoJugadores[0];
+			indice = 0;
 		}else {
 			cartaMano = cartasManoJugadores[1];
+			indice = 1;
 		}
 		
 		switch(cartaMesa.personaje){
@@ -916,7 +1081,8 @@ LoveLetterOnline.Jugar.prototype = {
 					console.log("OMG coincide!!!!!");
 					cartaDescarteJugadores[jugadorB].vivo = false;
 					game.sendMessage("PASAR_ESTADO_JUGADOR", {partida: partida_actual, jugador: jugadorB, vivo: cartaDescarteJugadores[jugadorB].vivo, protegido: cartaDescarteJugadores[jugadorB].protegido, corazones: cartaDescarteJugadores[jugadorB].corazones});
-			
+					
+					game.sendMessage("DERROTADO", {partida: partida_actual, jugador: jugadorB});	
 				}else{
 					console.log("JOP... :( no la mato");
 				}
@@ -936,7 +1102,7 @@ LoveLetterOnline.Jugar.prototype = {
 					cartasManoJugadores[0].destroy();
 					delete cartasManoJugadores[0];
 					cartasManoJugadores[0] = cartaAux;
-					cartasManoJugadores[0].events.onInputUp.add(that.elegirCarta, this, 0, 0);
+					cartasManoJugadores[0].events.onInputUp.addOnce(that.elegirCarta, this, 0, 0);
 				}else {
 					
 					cartaAux = that.crearCarta(posManoJugadores[0][0]-gameOptions.cardSheetWidth-32, posManoJugadores[0][1], personajeB, valorB, tipoframeB, true, true);
@@ -944,12 +1110,13 @@ LoveLetterOnline.Jugar.prototype = {
 					cartasManoJugadores[1].destroy();
 					delete cartasManoJugadores[1];
 					cartasManoJugadores[1] = cartaAux;
-					cartasManoJugadores[1].events.onInputUp.add(that.elegirCarta, this, 0, 1);
+					cartasManoJugadores[1].events.onInputUp.addOnce(that.elegirCarta, this, 0, 1);
 				}
 			
 			break;
 			case "Cura":
 				console.log("MUAJAJAJA, le he visto la carta al jugador "+ (jugadorB+1) + " y ahora sé que tiene un " +personajeB);
+				that.efectoCura(jugadorA, cartaMesa, cartaMano, jugadorB, personajeB, valorB, tipoframeB);
 			break;
 			case "Baron":
 				if(cartaMano.valor > valorB){
@@ -957,12 +1124,16 @@ LoveLetterOnline.Jugar.prototype = {
 					console.log(cartaMano.personaje +" vs "+  personajeB + ". Le matao con mi barón!");
 					cartaDescarteJugadores[jugadorB].vivo = false;
 					game.sendMessage("PASAR_ESTADO_JUGADOR", {partida: partida_actual, jugador: jugadorB, vivo: cartaDescarteJugadores[jugadorB].vivo, protegido: cartaDescarteJugadores[jugadorB].protegido, corazones: cartaDescarteJugadores[jugadorB].corazones});
-			
+					
+					game.sendMessage("DERROTADO", {partida: partida_actual, jugador: jugadorB});
 				}else if(cartaMano.valor < valorB){
 					console.log(cartaMano.personaje +" vs "+  personajeB + ". Me muero :(");
 					cartaDescarteJugadores[jugadorA].vivo = false;
 					game.sendMessage("PASAR_ESTADO_JUGADOR", {partida: partida_actual, jugador: jugadorA, vivo: cartaDescarteJugadores[jugadorA].vivo, protegido: cartaDescarteJugadores[jugadorA].protegido, corazones: cartaDescarteJugadores[jugadorA].corazones});
-			
+				
+					that.animacionDescartar(cartaMano.tipoframe, indice, pos_ingame, false, true);
+					game.sendMessage("DESCARTAR", {partida: partida_actual, tipo: cartaMano.tipoframe, indice: indice, jugadorReceptor: pos_ingame, hacerEfecto: false, muerto: true});		
+				
 				}else if(cartaMano.valor == valorB){
 					console.log(cartaMano.personaje +" vs "+  personajeB + ". Empate!");
 				}
@@ -974,11 +1145,15 @@ LoveLetterOnline.Jugar.prototype = {
 					console.log(cartaMano.personaje +" vs "+  personajeB + ". Le matao con mi baronesa!");
 					cartaDescarteJugadores[jugadorB].vivo = false;
 					game.sendMessage("PASAR_ESTADO_JUGADOR", {partida: partida_actual, jugador: jugadorB, vivo: cartaDescarteJugadores[jugadorB].vivo, protegido: cartaDescarteJugadores[jugadorB].protegido, corazones: cartaDescarteJugadores[jugadorB].corazones});
-			
+					
+					game.sendMessage("DERROTADO", {partida: partida_actual, jugador: jugadorB});
 				}else if(cartaMano.valor > valorB){
 					console.log(cartaMano.personaje +" vs "+  personajeB + ". Me muero :(");
 					cartaDescarteJugadores[jugadorA].vivo = false;
 					game.sendMessage("PASAR_ESTADO_JUGADOR", {partida: partida_actual, jugador: jugadorA, vivo: cartaDescarteJugadores[jugadorA].vivo, protegido: cartaDescarteJugadores[jugadorA].protegido, corazones: cartaDescarteJugadores[jugadorA].corazones});
+					
+					that.animacionDescartar(cartaMano.tipoframe, indice, pos_ingame, false, true);
+					game.sendMessage("DESCARTAR", {partida: partida_actual, tipo: cartaMano.tipoframe, indice: indice, jugadorReceptor: pos_ingame, hacerEfecto: false, muerto: true});		
 			
 				}else if(cartaMano.valor == valorB){
 					console.log(cartaMano.personaje +" vs "+  personajeB + ". Empate!");
@@ -988,14 +1163,50 @@ LoveLetterOnline.Jugar.prototype = {
 			break;
 		}
 		
+		if(cartaMesa.personaje != "Cura")
 		game.time.events.add(750, game.sendMessage, this, "PASAR_TURNO", {partida: partida_actual, turno: global_turnos});
 		
 	},
 	
-	//Recuenta el número de jugadores vivos
-	isFinJuego: function(){
+	efectoCura: function(jugadorA, cartaMesa, cartaMano, jugadorB, personajeB, valorB, tipoframeB){
 		
+		var pos = jugadorB - pos_ingame;
+		if(pos<0) pos+=numeroJugadores;
+		
+		var tween;
+		var carta = that.crearCarta(posManoJugadores[pos][0], posManoJugadores[pos][1], personajeB, valorB, tipoframeB, false, true);
+		
+		tween = game.add.tween(carta).to({
+			x: posManoJugadores[pos][0], 
+			y: game.world.centerY
+		},750,Phaser.Easing.Cubic.Out, true);
+		
+		tween.onComplete.add(function() {
+			game.time.events.add(1000, function(){
+				tween = game.add.tween(carta).to({
+					x: posManoJugadores[pos][0], 
+					y: posManoJugadores[pos][1]
+				},750,Phaser.Easing.Cubic.Out, true);
+				
+				tween.onComplete.add(function() {
+					carta.destroy();
+					game.time.events.add(750, game.sendMessage, this, "PASAR_TURNO", {partida: partida_actual, turno: global_turnos});
+				});
+			});
+		});
+	},
+	
+	animEnsenarCarta: function(){},
+	animRecibirCarta: function(){},
+	animCambiarCarta: function(){},
+	animCambiarCartas: function(){},
+	
+	
+	isFinRonda: function(){
+	
 		var ganador;
+		
+		//Recuenta el número de jugadores vivos
 		var contador = 0;
 		for(var i=0; i< cartaDescarteJugadores.length; i++){
 			if(cartaDescarteJugadores[i].vivo){
@@ -1004,51 +1215,51 @@ LoveLetterOnline.Jugar.prototype = {
 			}
 		}
 		
+		//Si quedan menos de 2 vivos, el juego ha finalizado
 		if(contador < 2) {
-			that.finJuego(ganador);
+			that.finRonda(ganador);
 			return true;
 		}else{
 			return false;
 		}
+		
 	},
 	
-	finJuego: function(ganador){/*******CHECK**********/
+	finRonda: function(ganador){/*******CHECK**********/
 		
-		console.log("El juego ha finalizado!!! El ganador es el jugador " + (ganador+1));
+		console.log("La ronda ha finalizado!!! El ganador de la ronda es el jugador " + (ganador+1));
 		
+		/************SI ES MAYORDOMO GANA 2***************/
 		cartaDescarteJugadores[ganador].corazones += 1;
 		game.sendMessage("PASAR_ESTADO_JUGADOR", {partida: partida_actual, jugador: ganador, vivo: cartaDescarteJugadores[ganador].vivo, protegido: cartaDescarteJugadores[ganador].protegido, corazones: cartaDescarteJugadores[ganador].corazones});
 		
-		game.sendMessage("END_GAME", {partida: partida_actual});
-		that.deletePartida(partida_actual.id);
+		//Actualizo la puntuación del jugador en el servidor
+		var jugador_tmp;
+		jugador_tmp = partida_actual.jugsPartida[ganador];
+		jugador_tmp.partidasGanadas +=1;
+		that.putJugador(jugador_tmp);
 		
-		game.time.events.add(3000,function(){
-			game.goTo("Menu");
-		});
+		
+		//Se pintan los corazones del jugador ganador
+		that.pintarCorazones(ganador);
+		game.sendMessage("FIN_RONDA", {partida: partida_actual, jugador: ganador});
 		
 		
-		/************MAL PINTAOS **************/
-		//Se pintan los corazones de cada jugador
-		for(var i=0; i<numeroJugadores; i++) {
-			for(var j=0; j<cartaDescarteJugadores[i].corazones;j++){
-				if(i===0){
-					var cor = game.add.image(posMesaJugadores[i][0]-50+40*j,posMesaJugadores[i][1]-gameOptions.cardSheetHeight/2-15, 'corazon');
-				}else{
-					var cor = game.add.image(posMesaJugadores[i][0]-50+40*j,posMesaJugadores[i][1]+gameOptions.cardSheetHeight/2+15, 'corazon');
-				}
-				cor.anchor.setTo(0.5,0.5);
-				cor.scale.setTo(0.8,0.8);
-			}
-		}
-		
+		/***********ESTO SERIA UN FIN PARTIDA*******/
 		//Si algún jugador ha conseguido todos los corazones, es el ganador definitivo
 		for(var idx=0; idx<numeroJugadores; idx++){
 			if(cartaDescarteJugadores[idx].corazones>=corazonesParaGanar){
 				ganadorJuego = idx;
-				console.log("YA TENEMOS GANADOR, es "+ (idx+1));
-				//return true;
+				console.log("YA TENEMOS GANADOR DE PARTIDA, es "+ (idx+1));
 			}
 		}
+		
+		/**********SI SOLO HACE FALTA GANAR UN CORAZON EN LA RONDA***********/
+		game.sendMessage("END_GAME", {partida: partida_actual});
+		that.deletePartida(partida_actual.id);
+		game.time.events.add(6000,function(){
+			game.goTo("Menu");
+		});
 		
 		
 		//return false;
@@ -1057,6 +1268,55 @@ LoveLetterOnline.Jugar.prototype = {
 
 		//game.time.events.add(5000, LoveLetterOnline.Jugar.prototype.resetear);
 	}, 
+	
+	getNumJugsVivos: function(){
+		//Recuenta el número de jugadores vivos
+		var contador = 0;
+		for(var i=0; i< cartaDescarteJugadores.length; i++){
+			if(cartaDescarteJugadores[i].vivo){
+				contador++;
+			}
+		}
+		return contador;
+	},
+	
+	pintarCorazones: function(ganador){
+		
+		var pos;
+		var cor;
+		
+		pos = ganador - pos_ingame;
+		if(pos<0) pos+=numeroJugadores;
+		
+		for(var j=0; j<cartaDescarteJugadores[ganador].corazones; j++){
+			if(pos===0){
+				cor = game.add.image(posMesaJugadores[pos][0]-50+40*j,posMesaJugadores[pos][1]-gameOptions.cardSheetHeight/2-15, 'corazon');
+			}else{
+				cor = game.add.image(posMesaJugadores[pos][0]-50+40*j,posMesaJugadores[pos][1]+gameOptions.cardSheetHeight/2+15, 'corazon');
+			}
+			cor.anchor.setTo(0.5,0.5);
+			cor.scale.setTo(0.8,0.8);
+		}
+		
+		/*
+		
+		//Si ganaran varios jugadores a la vez
+		
+		for(var i=0; i<numeroJugadores; i++) {
+			pos = i - pos_ingame;
+			if(pos<0) pos+=numeroJugadores;
+			for(var j=0; j<cartaDescarteJugadores[i].corazones;j++){
+				if(pos===0){
+					cor = game.add.image(posMesaJugadores[pos][0]-50+40*j,posMesaJugadores[pos][1]-gameOptions.cardSheetHeight/2-15, 'corazon');
+				}else{
+					cor = game.add.image(posMesaJugadores[pos][0]-50+40*j,posMesaJugadores[pos][1]+gameOptions.cardSheetHeight/2+15, 'corazon');
+				}
+				cor.anchor.setTo(0.5,0.5);
+				cor.scale.setTo(0.8,0.8);
+			}
+		}
+		*/
+	},
 	
 	deletePartida: function(id_tmp){
 		$.ajax({
@@ -1069,6 +1329,37 @@ LoveLetterOnline.Jugar.prototype = {
 			console.log("Partida deleted: " + JSON.stringify(partida_tmp));
 		});
 	},
+	
+	putJugador: function(jugador_tmp){
+		$.ajax({
+			method: "PUT",
+			url: 'http://localhost:8080/jugadores/' + jugador_tmp.id,
+			data: JSON.stringify(jugador_tmp),
+			processData: false,
+			headers: {
+				"Content-Type": "application/json"
+			}
+		}).done(function (jugador_tmp) {
+			console.log("Jugador updated: " + JSON.stringify(jugador_tmp));
+		});
+	},
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	

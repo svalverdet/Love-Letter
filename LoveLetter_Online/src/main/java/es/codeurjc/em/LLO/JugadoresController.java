@@ -78,7 +78,6 @@ public class JugadoresController {
 			return new ResponseEntity<>(jugadorActualizado, HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
 		}
 		
 		/*

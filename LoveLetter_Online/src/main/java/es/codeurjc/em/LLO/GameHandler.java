@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.web.socket.CloseStatus;
@@ -13,6 +14,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -34,6 +36,29 @@ public class GameHandler extends TextWebSocketHandler {
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
 		synchronized(sessions) {
 			System.out.println("Session closed: " + session.getId());
+			
+			//Se crea un nodo
+			ObjectNode node = mapper.createObjectNode();			node.put("action", "END_GAME");
+			
+			Partida p = null;
+			//Busco la partida que tenga ese jugador
+			for(Partida p_tmp : PartidasService.getPartidas()){
+				List<Jugador> jugadoresPartida = p_tmp.getJugsPartida();
+				for(int j=0; j<jugadoresPartida.size(); j++) {
+					String id1 = jugadoresPartida.get(j).getWsID();
+					String id2 = session.getId();
+					if(id1.equals(id2)) {
+						p = p_tmp;
+					}
+				}
+			}
+			
+			//Comparto la información con el resto de jugadores de la partida
+			if(p != null) {
+				sendOtherParticipants(session, node, p.getJugsPartida());
+			}
+			
+			//Elimino la sesión
 			sessions.remove(session.getId());
 		}
 	}
@@ -64,7 +89,10 @@ public class GameHandler extends TextWebSocketHandler {
 				case("HACER_DESAFIO"):
 				case("RESOLVER_DESAFIO"):
 				case("PASAR_ESTADO_JUGADOR"):
+				case("DERROTADO"):
 				case("END_GAME"):
+				case("SOLICITAR_CARTAS"):
+				case("FIN_RONDA"):
 					partida_id = node.get("data").get("partida").get("id").asLong();
 					sendOtherParticipants(session, node, PartidasService.getPartida(partida_id).getJugsPartida());
 					break;
@@ -112,6 +140,8 @@ public class GameHandler extends TextWebSocketHandler {
 				newNode.set("tipo", node.get("data").get("tipo"));
 				newNode.set("indice", node.get("data").get("indice"));
 				newNode.set("jugadorReceptor", node.get("data").get("jugadorReceptor"));
+				newNode.set("hacerEfecto", node.get("data").get("hacerEfecto"));
+				newNode.set("muerto", node.get("data").get("muerto"));
 				break;
 			case("SEND_DECK_INDEX"):
 				newNode.put("id", node.get("data").get("id").asText());
@@ -145,6 +175,18 @@ public class GameHandler extends TextWebSocketHandler {
 				newNode.set("vivo", node.get("data").get("vivo"));
 				newNode.set("protegido", node.get("data").get("protegido"));
 				newNode.set("corazones", node.get("data").get("corazones"));
+				break;
+			case("SOLICITAR_CARTAS"):
+				newNode.set("solicitante", node.get("data").get("solicitante"));
+				newNode.set("solicitado", node.get("data").get("solicitado"));
+				newNode.set("valor", node.get("data").get("valor"));
+				break;
+			case("DERROTADO"):
+				newNode.set("jugador", node.get("data").get("jugador"));
+				break;
+			case("FIN_RONDA"):
+				newNode.set("jugador", node.get("data").get("jugador"));
+				break;
 			default:
 				break;
 		}
